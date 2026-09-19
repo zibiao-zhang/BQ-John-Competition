@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>BQ John Competition</title>
 
   <style>
@@ -62,7 +63,7 @@
     }
 
     .card {
-      background: white;
+      background: var(--white);
       border-radius: 16px;
       padding: 22px;
       margin-bottom: 18px;
@@ -177,6 +178,7 @@
     .type-option input {
       width: 16px;
       min-height: 16px;
+      margin: 0;
     }
 
     .type-code {
@@ -216,6 +218,7 @@
       border-radius: 9px;
       background: var(--light-red);
       color: var(--red);
+      line-height: 1.5;
     }
 
     .player-list {
@@ -262,7 +265,6 @@
     .player-action {
       display: flex;
       justify-content: flex-end;
-      gap: 8px;
       margin-top: 8px;
     }
 
@@ -355,7 +357,7 @@
 
     .livekit-participant-name {
       padding: 8px;
-      background: #2457a6;
+      background: var(--blue);
       font-size: 14px;
       font-weight: bold;
     }
@@ -433,21 +435,18 @@
       <h2>Coach Setup</h2>
 
       <label>Start Reference</label>
-
       <div class="reference-grid">
         <select id="coachStartChapter"></select>
         <select id="coachStartVerse"></select>
       </div>
 
       <label>End Reference</label>
-
       <div class="reference-grid">
         <select id="coachEndChapter"></select>
         <select id="coachEndVerse"></select>
       </div>
 
       <label>Question Types</label>
-
       <div id="coachTypeGrid" class="type-grid"></div>
 
       <label for="coachQuestionCount">
@@ -487,11 +486,9 @@
 
       <div id="coachRoomArea" class="hidden">
         <div id="coachStatus" class="status"></div>
-
         <div id="coachRoomCode" class="room-code"></div>
 
         <h3>Players</h3>
-
         <ul id="coachPlayerList" class="player-list"></ul>
 
         <button id="startCompetitionButton" class="green">
@@ -512,10 +509,7 @@
     <section id="studentScreen" class="card hidden">
       <h2>Join Competition</h2>
 
-      <label for="studentName">
-        Your Name
-      </label>
-
+      <label for="studentName">Your Name</label>
       <input
         id="studentName"
         type="text"
@@ -523,10 +517,7 @@
         placeholder="Enter your name"
       >
 
-      <label for="roomCodeInput">
-        Room Code
-      </label>
-
+      <label for="roomCodeInput">Room Code</label>
       <input
         id="roomCodeInput"
         type="text"
@@ -540,11 +531,9 @@
 
       <div id="studentRoomArea" class="hidden">
         <div id="studentStatus" class="status"></div>
-
         <div id="studentRoomCode" class="room-code"></div>
 
         <h3>Players</h3>
-
         <ul id="studentPlayerList" class="player-list"></ul>
 
         <button id="studentLeaveButton" class="red">
@@ -703,14 +692,13 @@
     <div id="errorMessage" class="error hidden"></div>
   </main>
 
-  <!-- Firebase -->
+  <!-- Firebase and LiveKit -->
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
 
   <script src="firebase-config.js"></script>
   <script src="livekit-config.js"></script>
-
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.21.0/dist/livekit-client.umd.min.js"></script>
   <script src="livekit-media.js"></script>
 
@@ -738,15 +726,10 @@
   <script src="questions-21.js"></script>
 
   <script>
-    firebase.initializeApp(
-      window.FIREBASE_CONFIG
-    );
+    firebase.initializeApp(window.FIREBASE_CONFIG);
 
-    const auth =
-      firebase.auth();
-
-    const database =
-      firebase.database();
+    const auth = firebase.auth();
+    const database = firebase.database();
 
     const QUESTION_BANK =
       Array.isArray(window.QUESTION_BANK)
@@ -770,43 +753,17 @@
     };
 
     const CHAPTER_VERSES = {
-      1: 51,
-      2: 25,
-      3: 36,
-      4: 54,
-      5: 47,
-      6: 71,
-      7: 53,
-      8: 59,
-      9: 41,
-      10: 42,
-      11: 57,
-      12: 50,
-      13: 38,
-      14: 31,
-      15: 27,
-      16: 33,
-      17: 26,
-      18: 40,
-      19: 42,
-      20: 31,
-      21: 25
+      1: 51, 2: 25, 3: 36, 4: 54, 5: 47,
+      6: 71, 7: 53, 8: 59, 9: 41, 10: 42,
+      11: 57, 12: 50, 13: 38, 14: 31,
+      15: 27, 16: 33, 17: 26, 18: 40,
+      19: 42, 20: 31, 21: 25
     };
 
     const QUESTION_TYPE_ORDER = [
-      "INT",
-      "MA",
-      "Q",
-      "FTV",
-      "CR",
-      "CVR",
-      "SIT",
-      "F2V",
-      "Q2V",
-      "FT",
-      "FTN",
-      "CRMA",
-      "CVRMA"
+      "INT", "MA", "Q", "FTV", "CR", "CVR",
+      "SIT", "F2V", "Q2V", "FT", "FTN",
+      "CRMA", "CVRMA"
     ];
 
     let currentUser = null;
@@ -814,128 +771,37 @@
     let currentRole = null;
     let currentRoomListener = null;
     let currentRoomData = null;
-
     let microphoneOn = false;
     let cameraOn = false;
 
-    const homeScreen =
-      document.getElementById("homeScreen");
+    const $ = id => document.getElementById(id);
 
-    const coachScreen =
-      document.getElementById("coachScreen");
-
-    const studentScreen =
-      document.getElementById("studentScreen");
-
-    const coachCompetitionScreen =
-      document.getElementById("coachCompetitionScreen");
-
-    const studentCompetitionScreen =
-      document.getElementById("studentCompetitionScreen");
-
-    const coachRoomArea =
-      document.getElementById("coachRoomArea");
-
-    const studentRoomArea =
-      document.getElementById("studentRoomArea");
-
-    const coachRoomCode =
-      document.getElementById("coachRoomCode");
-
-    const studentRoomCode =
-      document.getElementById("studentRoomCode");
-
-    const coachPlayerList =
-      document.getElementById("coachPlayerList");
-
-    const studentPlayerList =
-      document.getElementById("studentPlayerList");
-
-    const coachStatus =
-      document.getElementById("coachStatus");
-
-    const studentStatus =
-      document.getElementById("studentStatus");
-
-    const coachCompetitionStatus =
-      document.getElementById("coachCompetitionStatus");
-
-    const studentCompetitionStatus =
-      document.getElementById("studentCompetitionStatus");
-
-    const coachQuestionBox =
-      document.getElementById("coachQuestionBox");
-
-    const studentQuestionBox =
-      document.getElementById("studentQuestionBox");
-
-    const coachQuestionLabel =
-      document.getElementById("coachQuestionLabel");
-
-    const studentQuestionLabel =
-      document.getElementById("studentQuestionLabel");
-
-    const coachQuestionText =
-      document.getElementById("coachQuestionText");
-
-    const studentQuestionText =
-      document.getElementById("studentQuestionText");
-
-    const coachQuestionReference =
-      document.getElementById("coachQuestionReference");
-
-    const studentQuestionReference =
-      document.getElementById("studentQuestionReference");
-
-    const coachBuzzedBanner =
-      document.getElementById("coachBuzzedBanner");
-
-    const studentBuzzedBanner =
-      document.getElementById("studentBuzzedBanner");
-
-    const coachCorrectButton =
-      document.getElementById("coachCorrectButton");
-
-    const coachWrongButton =
-      document.getElementById("coachWrongButton");
-
-    const coachNextButton =
-      document.getElementById("coachNextButton");
-
-    const studentBuzzButton =
-      document.getElementById("studentBuzzButton");
-
-    const coachScoreboardBody =
-      document.getElementById("coachScoreboardBody");
-
-    const studentScoreboardBody =
-      document.getElementById("studentScoreboardBody");
-
-    const coachMediaStatus =
-      document.getElementById("coachMediaStatus");
-
-    const studentMediaStatus =
-      document.getElementById("studentMediaStatus");
-
-    const errorMessage =
-      document.getElementById("errorMessage");
+    const homeScreen = $("homeScreen");
+    const coachScreen = $("coachScreen");
+    const studentScreen = $("studentScreen");
+    const coachCompetitionScreen = $("coachCompetitionScreen");
+    const studentCompetitionScreen = $("studentCompetitionScreen");
 
     function showError(message) {
-      errorMessage.textContent = message;
-      errorMessage.classList.remove("hidden");
+      $("errorMessage").textContent = message;
+      $("errorMessage").classList.remove("hidden");
     }
 
     function clearError() {
-      errorMessage.textContent = "";
-      errorMessage.classList.add("hidden");
+      $("errorMessage").textContent = "";
+      $("errorMessage").classList.add("hidden");
     }
 
     function showOnly(screen) {
-      homeScreen.classList.add("hidden");
-      coachScreen.classList.add("hidden");
-      studentScreen.classList.add("hidden");
-      coachCompetitionScreen.classList.add("hidden");
-      studentCompetitionScreen.classList.add("hidden");
+      [
+        homeScreen,
+        coachScreen,
+        studentScreen,
+        coachCompetitionScreen,
+        studentCompetitionScreen
+      ].forEach(element => {
+        element.classList.add("hidden");
+      });
 
       screen.classList.remove("hidden");
     }
@@ -948,9 +814,7 @@
 
       for (let i = 0; i < 6; i++) {
         code += characters[
-          Math.floor(
-            Math.random() * characters.length
-          )
+          Math.floor(Math.random() * characters.length)
         ];
       }
 
@@ -960,36 +824,26 @@
     function shuffle(array) {
       const copied = [...array];
 
-      for (
-        let index = copied.length - 1;
-        index > 0;
-        index--
-      ) {
-        const randomIndex =
-          Math.floor(
-            Math.random() * (index + 1)
-          );
+      for (let i = copied.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
 
-        [
-          copied[index],
-          copied[randomIndex]
-        ] = [
-          copied[randomIndex],
-          copied[index]
+        [copied[i], copied[j]] = [
+          copied[j],
+          copied[i]
         ];
       }
 
       return copied;
     }
 
+    function getPosition(chapter, verse) {
+      return chapter * 1000 + verse;
+    }
+
     function getQuestionById(id) {
       return QUESTION_BANK.find(
         question => question.id === id
       );
-    }
-
-    function getPosition(chapter, verse) {
-      return chapter * 1000 + verse;
     }
 
     function getSelectedTypes() {
@@ -1001,221 +855,128 @@
     }
 
     function renderCoachTypes() {
-      const grid =
-        document.getElementById("coachTypeGrid");
-
+      const grid = $("coachTypeGrid");
       grid.innerHTML = "";
 
-      const availableTypes = [
-        ...new Set(
-          QUESTION_BANK
-            .map(question => question.type)
-            .filter(Boolean)
-        )
-      ];
+      const available = new Set(
+        QUESTION_BANK
+          .map(question => question.type)
+          .filter(Boolean)
+      );
 
       QUESTION_TYPE_ORDER
-        .filter(type =>
-          availableTypes.includes(type)
-        )
+        .filter(type => available.has(type))
         .forEach(type => {
-          const label =
-            document.createElement("label");
+          const label = document.createElement("label");
+          label.className = "type-option";
 
-          label.className =
-            "type-option";
-
-          const checkbox =
-            document.createElement("input");
-
+          const checkbox = document.createElement("input");
           checkbox.type = "checkbox";
           checkbox.name = "coachType";
           checkbox.value = type;
           checkbox.checked = true;
+          checkbox.addEventListener("change", updateCoachPreview);
 
-          checkbox.addEventListener(
-            "change",
-            updateCoachPreview
-          );
+          const code = document.createElement("span");
+          code.className = "type-code";
+          code.textContent = type;
 
-          const code =
-            document.createElement("span");
-
-          code.className =
-            "type-code";
-
-          code.textContent =
-            type;
-
-          const name =
-            document.createElement("span");
-
-          name.textContent =
-            TYPE_NAMES[type] || type;
+          const name = document.createElement("span");
+          name.textContent = TYPE_NAMES[type] || type;
 
           label.appendChild(checkbox);
           label.appendChild(code);
           label.appendChild(name);
-
           grid.appendChild(label);
         });
     }
 
-    function populateChapterSelect(selectElement) {
+    function populateChapters(selectElement) {
       selectElement.innerHTML = "";
 
       for (let chapter = 1; chapter <= 21; chapter++) {
-        const option =
-          document.createElement("option");
-
-        option.value =
-          chapter;
-
-        option.textContent =
-          "John " + chapter;
-
+        const option = document.createElement("option");
+        option.value = chapter;
+        option.textContent = "John " + chapter;
         selectElement.appendChild(option);
       }
     }
 
-    function populateVerseSelect(
-      selectElement,
-      chapter,
-      selectedVerse = 1
-    ) {
+    function populateVerses(selectElement, chapter, selectedVerse) {
       selectElement.innerHTML = "";
-
-      const totalVerses =
-        CHAPTER_VERSES[chapter];
 
       for (
         let verse = 1;
-        verse <= totalVerses;
+        verse <= CHAPTER_VERSES[chapter];
         verse++
       ) {
-        const option =
-          document.createElement("option");
-
-        option.value =
-          verse;
-
-        option.textContent =
-          "Verse " + verse;
-
+        const option = document.createElement("option");
+        option.value = verse;
+        option.textContent = "Verse " + verse;
         selectElement.appendChild(option);
       }
 
       selectElement.value =
         Math.min(
-          selectedVerse,
-          totalVerses
+          selectedVerse || 1,
+          CHAPTER_VERSES[chapter]
         );
     }
 
     function getCoachSettings() {
       return {
-        startChapter: Number(
-          document.getElementById(
-            "coachStartChapter"
-          ).value
-        ),
-
-        startVerse: Number(
-          document.getElementById(
-            "coachStartVerse"
-          ).value
-        ),
-
-        endChapter: Number(
-          document.getElementById(
-            "coachEndChapter"
-          ).value
-        ),
-
-        endVerse: Number(
-          document.getElementById(
-            "coachEndVerse"
-          ).value
-        ),
-
-        questionTypes:
-          getSelectedTypes(),
-
+        startChapter: Number($("coachStartChapter").value),
+        startVerse: Number($("coachStartVerse").value),
+        endChapter: Number($("coachEndChapter").value),
+        endVerse: Number($("coachEndVerse").value),
+        questionTypes: getSelectedTypes(),
         questionCount:
-          document.getElementById(
-            "coachQuestionCount"
-          ).value === "all"
+          $("coachQuestionCount").value === "all"
             ? "all"
-            : Number(
-                document.getElementById(
-                  "coachQuestionCount"
-                ).value
-              ),
-
-        maxCorrect: Number(
-          document.getElementById(
-            "maxCorrectSelect"
-          ).value
-        )
+            : Number($("coachQuestionCount").value),
+        maxCorrect: Number($("maxCorrectSelect").value)
       };
     }
 
     function getQuestionsForSettings(settings) {
-      const start =
-        getPosition(
-          settings.startChapter,
-          settings.startVerse
-        );
+      const start = getPosition(
+        settings.startChapter,
+        settings.startVerse
+      );
 
-      const end =
-        getPosition(
-          settings.endChapter,
-          settings.endVerse
-        );
+      const end = getPosition(
+        settings.endChapter,
+        settings.endVerse
+      );
 
       return QUESTION_BANK.filter(question => {
-        const position =
-          getPosition(
-            question.chapter,
-            question.verse
-          );
+        const position = getPosition(
+          question.chapter,
+          question.verse
+        );
 
         return (
           position >= start &&
           position <= end &&
-          settings.questionTypes.includes(
-            question.type
-          )
+          settings.questionTypes.includes(question.type)
         );
       });
     }
 
     function updateCoachPreview() {
-      const settings =
-        getCoachSettings();
-
-      const preview =
-        document.getElementById(
-          "coachSetupPreview"
-        );
+      const settings = getCoachSettings();
 
       if (
-        getPosition(
-          settings.startChapter,
-          settings.startVerse
-        ) >
-        getPosition(
-          settings.endChapter,
-          settings.endVerse
-        )
+        getPosition(settings.startChapter, settings.startVerse) >
+        getPosition(settings.endChapter, settings.endVerse)
       ) {
-        preview.textContent =
+        $("coachSetupPreview").textContent =
           "Invalid reference range.";
         return;
       }
 
       if (settings.questionTypes.length === 0) {
-        preview.textContent =
+        $("coachSetupPreview").textContent =
           "Please select at least one question type.";
         return;
       }
@@ -1223,7 +984,7 @@
       const available =
         getQuestionsForSettings(settings).length;
 
-      preview.textContent =
+      $("coachSetupPreview").textContent =
         "Range: John " +
         settings.startChapter +
         ":" +
@@ -1232,7 +993,7 @@
         settings.endChapter +
         ":" +
         settings.endVerse +
-        ". Available: " +
+        ". Available questions: " +
         available +
         ". Max correct per student: " +
         settings.maxCorrect +
@@ -1243,185 +1004,280 @@
       listElement.innerHTML = "";
 
       if (!players) {
-        const item =
-          document.createElement("li");
-
-        item.className =
-          "player-item";
-
-        item.textContent =
-          "No players have joined yet.";
-
+        const item = document.createElement("li");
+        item.className = "player-item";
+        item.textContent = "No players have joined yet.";
         listElement.appendChild(item);
         return;
       }
 
-      Object.entries(players).forEach(
-        ([uid, player]) => {
-          const item =
-            document.createElement("li");
+      Object.entries(players).forEach(([uid, player]) => {
+        const item = document.createElement("li");
+        item.className = "player-item";
 
-          item.className =
-            "player-item";
-
-          if (
-            currentRoomData &&
-            currentRoomData.buzzedBy === uid
-          ) {
-            item.classList.add("buzzed");
-          }
-
-          const maxCorrect =
-            Number(
-              currentRoomData &&
-              currentRoomData.settings
-                ? currentRoomData.settings.maxCorrect
-                : 10
-            );
-
-          const correct =
-            Number(player.correct || 0);
-
-          if (correct >= maxCorrect) {
-            item.classList.add("limit-reached");
-          }
-
-          item.textContent =
-            player.name || "Unnamed";
-
-          const role =
-            document.createElement("span");
-
-          role.className =
-            "player-role";
-
-          role.textContent =
-            player.role === "coach"
-              ? "Coach"
-              : "Student";
-
-          const score =
-            document.createElement("span");
-
-          score.className =
-            "player-score";
-
-          score.textContent =
-            "Correct: " +
-            correct +
-            " / " +
-            maxCorrect +
-            " | Wrong: " +
-            Number(player.wrong || 0);
-
-          item.appendChild(role);
-          item.appendChild(score);
-
-          if (
-            currentRole === "coach" &&
-            player.role === "student"
-          ) {
-            const action =
-              document.createElement("div");
-
-            action.className =
-              "player-action";
-
-            const actionButton =
-              document.createElement("button");
-
-            actionButton.className =
-              player.limitOverride === true
-                ? "small-button red"
-                : "small-button secondary";
-
-            actionButton.textContent =
-              player.limitOverride === true
-                ? "Lock"
-                : "Unlock";
-
-            actionButton.addEventListener(
-              "click",
-              () => {
-                toggleStudentLimit(uid);
-              }
-            );
-
-            action.appendChild(actionButton);
-            item.appendChild(action);
-          }
-
-          listElement.appendChild(item);
+        if (
+          currentRoomData &&
+          currentRoomData.buzzedBy === uid
+        ) {
+          item.classList.add("buzzed");
         }
-      );
+
+        const maxCorrect =
+          currentRoomData && currentRoomData.settings
+            ? Number(currentRoomData.settings.maxCorrect)
+            : 10;
+
+        const correct = Number(player.correct || 0);
+
+        if (correct >= maxCorrect) {
+          item.classList.add("limit-reached");
+        }
+
+        item.textContent = player.name || "Unnamed";
+
+        const role = document.createElement("span");
+        role.className = "player-role";
+        role.textContent =
+          player.role === "coach"
+            ? "Coach"
+            : "Student";
+
+        const score = document.createElement("span");
+        score.className = "player-score";
+        score.textContent =
+          "Correct: " +
+          correct +
+          " / " +
+          maxCorrect +
+          " | Wrong: " +
+          Number(player.wrong || 0);
+
+        item.appendChild(role);
+        item.appendChild(score);
+
+        if (
+          currentRole === "coach" &&
+          player.role === "student"
+        ) {
+          const actions = document.createElement("div");
+          actions.className = "player-action";
+
+          const button = document.createElement("button");
+          button.className =
+            player.limitOverride === true
+              ? "small-button red"
+              : "small-button secondary";
+
+          button.textContent =
+            player.limitOverride === true
+              ? "Lock"
+              : "Unlock";
+
+          button.addEventListener("click", () => {
+            toggleStudentLimit(uid);
+          });
+
+          actions.appendChild(button);
+          item.appendChild(actions);
+        }
+
+        listElement.appendChild(item);
+      });
     }
 
     function renderScoreboard(body, room) {
       body.innerHTML = "";
 
-      const players =
-        room.players || {};
-
-      Object.entries(players)
-        .filter(([, player]) =>
-          player.role === "student"
-        )
+      Object.entries(room.players || {})
+        .filter(([, player]) => player.role === "student")
         .sort(([, a], [, b]) =>
-          Number(b.correct || 0) -
-          Number(a.correct || 0)
+          Number(b.correct || 0) - Number(a.correct || 0)
         )
         .forEach(([uid, player]) => {
-          const row =
-            document.createElement("tr");
+          const row = document.createElement("tr");
 
-          const correct =
-            Number(player.correct || 0);
+          const correct = Number(player.correct || 0);
+          const maxCorrect = Number(room.settings.maxCorrect);
 
-          const maxCorrect =
-            Number(room.settings.maxCorrect);
+          const nameCell = document.createElement("td");
+          const correctCell = document.createElement("td");
+          const wrongCell = document.createElement("td");
+          const statusCell = document.createElement("td");
 
-          const nameCell =
-            document.createElement("td");
-
-          const correctCell =
-            document.createElement("td");
-
-          const wrongCell =
-            document.createElement("td");
-
-          const statusCell =
-            document.createElement("td");
-
-          nameCell.textContent =
-            player.name;
-
-          correctCell.textContent =
-            correct + " / " + maxCorrect;
-
-          wrongCell.textContent =
-            Number(player.wrong || 0);
+          nameCell.textContent = player.name;
+          correctCell.textContent = correct + " / " + maxCorrect;
+          wrongCell.textContent = Number(player.wrong || 0);
 
           if (player.limitOverride === true) {
-            statusCell.textContent =
-              "Manual override";
+            statusCell.textContent = "Manual override";
           } else if (correct >= maxCorrect) {
-            statusCell.textContent =
-              "Limit reached";
+            statusCell.textContent = "Limit reached";
           } else if (room.buzzedBy === uid) {
-            statusCell.textContent =
-              "Buzzed in";
+            statusCell.textContent = "Buzzed in";
           } else {
-            statusCell.textContent =
-              "Ready";
+            statusCell.textContent = "Ready";
           }
 
           row.appendChild(nameCell);
           row.appendChild(correctCell);
           row.appendChild(wrongCell);
           row.appendChild(statusCell);
-
           body.appendChild(row);
         });
+    }
+
+    function renderQuestion(room) {
+      if (
+        room.status !== "started" ||
+        !Array.isArray(room.questionIds) ||
+        room.currentQuestionIndex < 0
+      ) {
+        $("coachQuestionBox").classList.add("hidden");
+        $("studentQuestionBox").classList.add("hidden");
+        return;
+      }
+
+      const question = getQuestionById(
+        room.questionIds[room.currentQuestionIndex]
+      );
+
+      if (!question) {
+        return;
+      }
+
+      const label =
+        "Question " +
+        (room.currentQuestionIndex + 1) +
+        " of " +
+        room.questionIds.length +
+        " | " +
+        question.type +
+        " - " +
+        (TYPE_NAMES[question.type] || question.type);
+
+      $("coachQuestionLabel").textContent = label;
+      $("studentQuestionLabel").textContent = label;
+
+      $("coachQuestionText").textContent = question.question;
+      $("studentQuestionText").textContent = question.question;
+
+      $("coachQuestionReference").textContent =
+        "Reference: " + question.reference;
+
+      $("studentQuestionReference").textContent =
+        "Reference: " + question.reference;
+
+      $("coachQuestionBox").classList.remove("hidden");
+      $("studentQuestionBox").classList.remove("hidden");
+    }
+
+    function renderBuzz(room) {
+      if (!room.buzzedBy) {
+        $("coachBuzzedBanner").classList.add("hidden");
+        $("studentBuzzedBanner").classList.add("hidden");
+        return;
+      }
+
+      const player =
+        room.players && room.players[room.buzzedBy];
+
+      const name =
+        player && player.name
+          ? player.name
+          : "A student";
+
+      $("coachBuzzedBanner").textContent =
+        name + " buzzed in.";
+
+      $("studentBuzzedBanner").textContent =
+        name + " is answering.";
+
+      $("coachBuzzedBanner").classList.remove("hidden");
+      $("studentBuzzedBanner").classList.remove("hidden");
+    }
+
+    function updateButtons(room) {
+      const player =
+        currentUser &&
+        room.players &&
+        room.players[currentUser.uid];
+
+      const reachedLimit =
+        currentRole === "student" &&
+        player &&
+        Number(player.correct || 0) >= Number(room.settings.maxCorrect) &&
+        player.limitOverride !== true;
+
+      const canBuzz =
+        currentRole === "student" &&
+        room.status === "started" &&
+        !room.buzzedBy &&
+        !reachedLimit;
+
+      $("studentBuzzButton").disabled = !canBuzz;
+
+      if (reachedLimit) {
+        $("studentBuzzButton").textContent = "Limit Reached";
+      } else if (room.buzzedBy) {
+        $("studentBuzzButton").textContent = "Someone Has Buzzed In";
+      } else {
+        $("studentBuzzButton").textContent = "Buzz In";
+      }
+
+      $("coachCorrectButton").disabled =
+        currentRole !== "coach" ||
+        room.status !== "started" ||
+        !room.buzzedBy;
+
+      $("coachWrongButton").disabled =
+        currentRole !== "coach" ||
+        room.status !== "started" ||
+        !room.buzzedBy;
+
+      $("coachNextButton").disabled =
+        currentRole !== "coach" ||
+        room.status !== "started";
+    }
+
+    function updateMediaStatus() {
+      const text =
+        "Microphone: " +
+        (microphoneOn ? "On" : "Off") +
+        " | Camera: " +
+        (cameraOn ? "On" : "Off");
+
+      $("coachMediaStatus").textContent = text;
+      $("studentMediaStatus").textContent = text;
+    }
+
+    async function connectCompetitionMedia() {
+      if (
+        !currentRoomCode ||
+        !currentUser ||
+        !currentRoomData ||
+        !window.LiveKitMedia
+      ) {
+        return;
+      }
+
+      try {
+        const player =
+          currentRoomData.players &&
+          currentRoomData.players[currentUser.uid];
+
+        const playerName =
+          player && player.name
+            ? player.name
+            : currentRole || "Participant";
+
+        await LiveKitMedia.connect(
+          "bq-" + currentRoomCode,
+          "firebase-" + currentUser.uid,
+          playerName
+        );
+      } catch (error) {
+        console.warn("LiveKit connection failed:", error);
+      }
     }
 
     function renderRoom(room) {
@@ -1432,390 +1288,78 @@
         return;
       }
 
-      currentRoomData =
-        room;
+      currentRoomData = room;
 
-      renderPlayers(
-        coachPlayerList,
-        room.players
-      );
+      renderPlayers($("coachPlayerList"), room.players);
+      renderPlayers($("studentPlayerList"), room.players);
 
-      renderPlayers(
-        studentPlayerList,
-        room.players
-      );
-
-      renderScoreboard(
-        coachScoreboardBody,
-        room
-      );
-
-      renderScoreboard(
-        studentScoreboardBody,
-        room
-      );
+      renderScoreboard($("coachScoreboardBody"), room);
+      renderScoreboard($("studentScoreboardBody"), room);
 
       if (currentRole === "coach") {
-        if (
-          room.status === "started" ||
-          room.status === "finished"
-        ) {
-          showOnly(coachCompetitionScreen);
-        } else {
-          showOnly(coachScreen);
-        }
+        showOnly(
+          room.status === "started" || room.status === "finished"
+            ? coachCompetitionScreen
+            : coachScreen
+        );
       }
 
       if (currentRole === "student") {
-        if (
-          room.status === "started" ||
-          room.status === "finished"
-        ) {
-          showOnly(studentCompetitionScreen);
-        } else {
-          showOnly(studentScreen);
-        }
+        showOnly(
+          room.status === "started" || room.status === "finished"
+            ? studentCompetitionScreen
+            : studentScreen
+        );
       }
 
       if (room.status === "waiting") {
-        coachStatus.textContent =
-          "Waiting for students.";
-
-        studentStatus.textContent =
+        $("coachStatus").textContent = "Waiting for students.";
+        $("studentStatus").textContent =
           "Waiting for the coach to start.";
       }
 
       if (room.status === "started") {
-        coachCompetitionStatus.textContent =
+        $("coachCompetitionStatus").textContent =
           "Competition is in progress.";
 
-        studentCompetitionStatus.textContent =
+        $("studentCompetitionStatus").textContent =
           "Competition is in progress.";
       }
 
       if (room.status === "finished") {
-        coachCompetitionStatus.textContent =
+        $("coachCompetitionStatus").textContent =
           "Competition finished.";
 
-        studentCompetitionStatus.textContent =
+        $("studentCompetitionStatus").textContent =
           "Competition finished.";
       }
 
       renderQuestion(room);
-      renderBuzzState(room);
+      renderBuzz(room);
       updateButtons(room);
       updateMediaStatus();
-      connectCompetitionMedia();
-    }
 
-    function renderQuestion(room) {
       if (
-        room.status !== "started" ||
-        !Array.isArray(room.questionIds) ||
-        room.currentQuestionIndex < 0
+        room.status === "started" ||
+        room.status === "finished"
       ) {
-        coachQuestionBox.classList.add("hidden");
-        studentQuestionBox.classList.add("hidden");
-        return;
-      }
-
-      const question =
-        getQuestionById(
-          room.questionIds[
-            room.currentQuestionIndex
-          ]
-        );
-
-      if (!question) {
-        return;
-      }
-
-      const typeName =
-        TYPE_NAMES[question.type] ||
-        question.type;
-
-      const label =
-        "Question " +
-        (room.currentQuestionIndex + 1) +
-        " of " +
-        room.questionIds.length +
-        " | " +
-        question.type +
-        " - " +
-        typeName;
-
-      coachQuestionLabel.textContent =
-        label;
-
-      studentQuestionLabel.textContent =
-        label;
-
-      coachQuestionText.textContent =
-        question.question;
-
-      studentQuestionText.textContent =
-        question.question;
-
-      coachQuestionReference.textContent =
-        "Reference: " +
-        question.reference;
-
-      studentQuestionReference.textContent =
-        "Reference: " +
-        question.reference;
-
-      coachQuestionBox.classList.remove(
-        "hidden"
-      );
-
-      studentQuestionBox.classList.remove(
-        "hidden"
-      );
-    }
-
-    function renderBuzzState(room) {
-      if (!room.buzzedBy) {
-        coachBuzzedBanner.classList.add(
-          "hidden"
-        );
-
-        studentBuzzedBanner.classList.add(
-          "hidden"
-        );
-
-        return;
-      }
-
-      const player =
-        room.players &&
-        room.players[room.buzzedBy];
-
-      const name =
-        player && player.name
-          ? player.name
-          : "A student";
-
-      coachBuzzedBanner.textContent =
-        name + " buzzed in.";
-
-      studentBuzzedBanner.textContent =
-        name + " is answering.";
-
-      coachBuzzedBanner.classList.remove(
-        "hidden"
-      );
-
-      studentBuzzedBanner.classList.remove(
-        "hidden"
-      );
-    }
-
-    function updateButtons(room) {
-      const buzzedBy =
-        room.buzzedBy;
-
-      const player =
-        currentUser &&
-        room.players &&
-        room.players[currentUser.uid];
-
-      const maxCorrect =
-        Number(room.settings.maxCorrect);
-
-      const reachedLimit =
-        currentRole === "student" &&
-        player &&
-        Number(player.correct || 0) >= maxCorrect &&
-        player.limitOverride !== true;
-
-      const canBuzz =
-        currentRole === "student" &&
-        room.status === "started" &&
-        !buzzedBy &&
-        !reachedLimit;
-
-      studentBuzzButton.disabled =
-        !canBuzz;
-
-      if (reachedLimit) {
-        studentBuzzButton.textContent =
-          "Limit Reached";
-      } else if (buzzedBy) {
-        studentBuzzButton.textContent =
-          "Someone Has Buzzed In";
-      } else {
-        studentBuzzButton.textContent =
-          "Buzz In";
-      }
-
-      coachCorrectButton.disabled =
-        currentRole !== "coach" ||
-        room.status !== "started" ||
-        !buzzedBy;
-
-      coachWrongButton.disabled =
-        currentRole !== "coach" ||
-        room.status !== "started" ||
-        !buzzedBy;
-
-      coachNextButton.disabled =
-        currentRole !== "coach" ||
-        room.status !== "started";
-    }
-  async function connectCompetitionMedia() {
-  if (
-    !currentRoomCode ||
-    !currentUser ||
-    !window.LiveKitMedia
-  ) {
-    return;
-  }
-
-  try {
-    const player =
-      currentRoomData &&
-      currentRoomData.players &&
-      currentRoomData.players[currentUser.uid];
-
-    const playerName =
-      player && player.name
-        ? player.name
-        : currentRole;
-
-    await LiveKitMedia.connect(
-      "bq-" + currentRoomCode,
-      currentUser.uid,
-      playerName
-    );
-
-  } catch (error) {
-    console.warn(
-      "LiveKit connection failed:",
-      error
-    );
-  }
-}
-   
-
-    function updateMediaStatus() {
-      const text =
-        "Microphone: " +
-        (microphoneOn ? "On" : "Off") +
-        " | Camera: " +
-        (cameraOn ? "On" : "Off");
-
-      coachMediaStatus.textContent =
-        text;
-
-      studentMediaStatus.textContent =
-        text;
-    }
-
-    async function turnMicrophoneOn() {
-      try {
-        if (!currentRoomCode) {
-          showError("You are not in a room.");
-          return;
-        }
-
-       const player =
-  currentRoomData.players[currentUser.uid];
-
-await LiveKitMedia.turnMicrophoneOn(
-  "bq-" + currentRoomCode,
-  currentUser.uid,
-  player ? player.name : currentRole
-);
-
-        microphoneOn = true;
-        updateMediaStatus();
-
-      } catch (error) {
-        showError(
-          "Could not turn on microphone: " +
-          error.message
-        );
-      }
-    }
-
-    function turnMicrophoneOff() {
-      try {
-        LiveKitMedia.turnMicrophoneOff();
-
-        microphoneOn = false;
-        updateMediaStatus();
-
-      } catch (error) {
-        showError(
-          "Could not turn off microphone: " +
-          error.message
-        );
-      }
-    }
-
-    async function turnCameraOn() {
-      try {
-        if (!currentRoomCode) {
-          showError("You are not in a room.");
-          return;
-        }
-    const player =
-  currentRoomData.players[currentUser.uid];
-
-await LiveKitMedia.turnCameraOn(
-  "bq-" + currentRoomCode,
-  currentUser.uid,
-  player ? player.name : currentRole
-);
-        
-
-        cameraOn = true;
-        updateMediaStatus();
-
-      } catch (error) {
-        showError(
-          "Could not turn on camera: " +
-          error.message
-        );
-      }
-    }
-
-    function turnCameraOff() {
-      try {
-        LiveKitMedia.turnCameraOff();
-
-        cameraOn = false;
-        updateMediaStatus();
-
-      } catch (error) {
-        showError(
-          "Could not turn off camera: " +
-          error.message
-        );
+        connectCompetitionMedia();
       }
     }
 
     function listenToRoom(roomCode) {
-      currentRoomCode =
-        roomCode;
+      currentRoomCode = roomCode;
 
       if (currentRoomListener) {
         currentRoomListener.off();
       }
 
       currentRoomListener =
-        database.ref(
-          "rooms/" + roomCode
-        );
+        database.ref("rooms/" + roomCode);
 
-      currentRoomListener.on(
-        "value",
-        snapshot => {
-          renderRoom(
-            snapshot.val()
-          );
-        }
-      );
+      currentRoomListener.on("value", snapshot => {
+        renderRoom(snapshot.val());
+      });
     }
 
     async function signInAnonymously() {
@@ -1823,11 +1367,8 @@ await LiveKitMedia.turnCameraOn(
         return currentUser;
       }
 
-      const result =
-        await auth.signInAnonymously();
-
-      currentUser =
-        result.user;
+      const result = await auth.signInAnonymously();
+      currentUser = result.user;
 
       return currentUser;
     }
@@ -1835,18 +1376,11 @@ await LiveKitMedia.turnCameraOn(
     async function createRoom() {
       clearError();
 
-      const settings =
-        getCoachSettings();
+      const settings = getCoachSettings();
 
       if (
-        getPosition(
-          settings.startChapter,
-          settings.startVerse
-        ) >
-        getPosition(
-          settings.endChapter,
-          settings.endVerse
-        )
+        getPosition(settings.startChapter, settings.startVerse) >
+        getPosition(settings.endChapter, settings.endVerse)
       ) {
         showError("Invalid reference range.");
         return;
@@ -1857,35 +1391,26 @@ await LiveKitMedia.turnCameraOn(
         return;
       }
 
-      const available =
-        getQuestionsForSettings(settings);
-
-      if (available.length === 0) {
+      if (getQuestionsForSettings(settings).length === 0) {
         showError("No questions match this selection.");
         return;
       }
 
       try {
-        const user =
-          await signInAnonymously();
-
-        currentRole =
-          "coach";
+        const user = await signInAnonymously();
+        currentRole = "coach";
 
         let roomCode;
         let exists = true;
 
         while (exists) {
-          roomCode =
-            makeRoomCode();
+          roomCode = makeRoomCode();
 
-          const snapshot =
-            await database.ref(
-              "rooms/" + roomCode
-            ).once("value");
+          const snapshot = await database
+            .ref("rooms/" + roomCode)
+            .once("value");
 
-          exists =
-            snapshot.exists();
+          exists = snapshot.exists();
         }
 
         const room = {
@@ -1895,8 +1420,7 @@ await LiveKitMedia.turnCameraOn(
           currentQuestionIndex: -1,
           buzzedBy: null,
           settings: settings,
-          createdAt:
-            firebase.database.ServerValue.TIMESTAMP,
+          createdAt: firebase.database.ServerValue.TIMESTAMP,
           players: {}
         };
 
@@ -1906,28 +1430,79 @@ await LiveKitMedia.turnCameraOn(
           correct: 0,
           wrong: 0,
           limitOverride: false,
-          joinedAt:
-            firebase.database.ServerValue.TIMESTAMP
+          joinedAt: firebase.database.ServerValue.TIMESTAMP
         };
 
-        await database.ref(
-          "rooms/" + roomCode
-        ).set(room);
+        await database
+          .ref("rooms/" + roomCode)
+          .set(room);
 
-        coachRoomCode.textContent =
-          roomCode;
+        $("coachRoomCode").textContent = roomCode;
+        $("coachRoomArea").classList.remove("hidden");
 
-        coachRoomArea.classList.remove(
-          "hidden"
-        );
-
-        showOnly(coachScreen);
         listenToRoom(roomCode);
-
       } catch (error) {
         showError(
-          "Could not create room: " +
-          error.message
+          "Could not create room: " + error.message
+        );
+      }
+    }
+
+    async function joinRoom() {
+      clearError();
+
+      const name = $("studentName").value.trim();
+      const roomCode = $("roomCodeInput").value
+        .trim()
+        .toUpperCase();
+
+      if (!name) {
+        showError("Please enter your name.");
+        return;
+      }
+
+      if (!/^[A-Z0-9]{6}$/.test(roomCode)) {
+        showError("Room code must be 6 characters.");
+        return;
+      }
+
+      try {
+        const user = await signInAnonymously();
+        const roomReference = database.ref("rooms/" + roomCode);
+        const snapshot = await roomReference.once("value");
+        const room = snapshot.val();
+
+        if (!room) {
+          showError("Room not found.");
+          return;
+        }
+
+        if (room.status !== "waiting") {
+          showError("Competition has already started.");
+          return;
+        }
+
+        currentRole = "student";
+
+        await roomReference
+          .child("players")
+          .child(user.uid)
+          .set({
+            name: name,
+            role: "student",
+            correct: 0,
+            wrong: 0,
+            limitOverride: false,
+            joinedAt: firebase.database.ServerValue.TIMESTAMP
+          });
+
+        $("studentRoomCode").textContent = roomCode;
+        $("studentRoomArea").classList.remove("hidden");
+
+        listenToRoom(roomCode);
+      } catch (error) {
+        showError(
+          "Could not join room: " + error.message
         );
       }
     }
@@ -1942,25 +1517,13 @@ await LiveKitMedia.turnCameraOn(
 
       try {
         const roomReference =
-          database.ref(
-            "rooms/" + currentRoomCode
-          );
+          database.ref("rooms/" + currentRoomCode);
 
-        const snapshot =
-          await roomReference.once("value");
-
-        const room =
-          snapshot.val();
-
-        if (!room) {
-          showError("Room no longer exists.");
-          return;
-        }
+        const snapshot = await roomReference.once("value");
+        const room = snapshot.val();
 
         const available =
-          getQuestionsForSettings(
-            room.settings
-          );
+          getQuestionsForSettings(room.settings);
 
         if (available.length === 0) {
           showError("No questions match the settings.");
@@ -1970,121 +1533,24 @@ await LiveKitMedia.turnCameraOn(
         const requested =
           room.settings.questionCount === "all"
             ? available.length
-            : Number(
-                room.settings.questionCount
-              );
+            : Number(room.settings.questionCount);
 
         const selected =
-          shuffle(available)
-            .slice(
-              0,
-              Math.min(
-                requested,
-                available.length
-              )
-            );
+          shuffle(available).slice(
+            0,
+            Math.min(requested, available.length)
+          );
 
         await roomReference.update({
           status: "started",
-          questionIds:
-            selected.map(
-              question => question.id
-            ),
+          questionIds: selected.map(question => question.id),
           currentQuestionIndex: 0,
           buzzedBy: null,
-          startedAt:
-            firebase.database.ServerValue.TIMESTAMP
+          startedAt: firebase.database.ServerValue.TIMESTAMP
         });
-
       } catch (error) {
         showError(
-          "Could not start competition: " +
-          error.message
-        );
-      }
-    }
-
-    async function joinRoom() {
-      clearError();
-
-      const name =
-        document.getElementById(
-          "studentName"
-        ).value.trim();
-
-      const roomCode =
-        document.getElementById(
-          "roomCodeInput"
-        ).value.trim().toUpperCase();
-
-      if (!name) {
-        showError("Please enter your name.");
-        return;
-      }
-
-      if (!/^[A-Z0-9]{6}$/.test(roomCode)) {
-        showError("Room code must be 6 characters.");
-        return;
-      }
-
-      try {
-        const user =
-          await signInAnonymously();
-
-        const roomReference =
-          database.ref(
-            "rooms/" + roomCode
-          );
-
-        const snapshot =
-          await roomReference.once("value");
-
-        const room =
-          snapshot.val();
-
-        if (!room) {
-          showError("Room not found.");
-          return;
-        }
-
-        if (room.status !== "waiting") {
-          showError("Competition has already started.");
-          return;
-        }
-
-        currentRole =
-          "student";
-
-        await roomReference
-          .child("players")
-          .child(user.uid)
-          .set({
-            name: name,
-            role: "student",
-            correct: 0,
-            wrong: 0,
-            limitOverride: false,
-            joinedAt:
-              firebase.database.ServerValue.TIMESTAMP
-          });
-
-        currentRoomCode =
-          roomCode;
-
-        studentRoomCode.textContent =
-          roomCode;
-
-        studentRoomArea.classList.remove(
-          "hidden"
-        );
-
-        showOnly(studentScreen);
-        listenToRoom(roomCode);
-
-      } catch (error) {
-        showError(
-          "Could not join room: " +
-          error.message
+          "Could not start competition: " + error.message
         );
       }
     }
@@ -2096,33 +1562,29 @@ await LiveKitMedia.turnCameraOn(
 
       try {
         const roomReference =
-          database.ref(
-            "rooms/" + currentRoomCode
-          );
+          database.ref("rooms/" + currentRoomCode);
 
-        const snapshot =
-          await roomReference.once("value");
-
-        const room =
-          snapshot.val();
+        const snapshot = await roomReference.once("value");
+        const room = snapshot.val();
 
         const player =
           room &&
           room.players &&
           room.players[currentUser.uid];
 
-        const maxCorrect =
-          Number(room.settings.maxCorrect);
+        if (!room || !player) {
+          return;
+        }
+
+        const reachedLimit =
+          Number(player.correct || 0) >=
+          Number(room.settings.maxCorrect) &&
+          player.limitOverride !== true;
 
         if (
-          !room ||
           room.status !== "started" ||
           room.buzzedBy ||
-          !player ||
-          (
-            Number(player.correct || 0) >= maxCorrect &&
-            player.limitOverride !== true
-          )
+          reachedLimit
         ) {
           return;
         }
@@ -2133,15 +1595,10 @@ await LiveKitMedia.turnCameraOn(
             if (value === null) {
               return currentUser.uid;
             }
-
             return;
           });
-
       } catch (error) {
-        showError(
-          "Could not buzz in: " +
-          error.message
-        );
+        showError("Could not buzz in: " + error.message);
       }
     }
 
@@ -2151,18 +1608,11 @@ await LiveKitMedia.turnCameraOn(
       }
 
       const roomReference =
-        database.ref(
-          "rooms/" + currentRoomCode
-        );
+        database.ref("rooms/" + currentRoomCode);
 
-      const snapshot =
-        await roomReference.once("value");
-
-      const room =
-        snapshot.val();
-
-      const uid =
-        room && room.buzzedBy;
+      const snapshot = await roomReference.once("value");
+      const room = snapshot.val();
+      const uid = room && room.buzzedBy;
 
       if (!uid || !room.players[uid]) {
         return;
@@ -2179,23 +1629,19 @@ await LiveKitMedia.turnCameraOn(
             return player;
           }
 
-          const correct =
-            Number(player.correct || 0);
+          const correct = Number(player.correct || 0);
 
           if (
             correct < maxCorrect ||
             player.limitOverride === true
           ) {
-            player.correct =
-              correct + 1;
+            player.correct = correct + 1;
           }
 
           return player;
         });
 
-      await roomReference
-        .child("buzzedBy")
-        .set(null);
+      await roomReference.child("buzzedBy").set(null);
     }
 
     async function markWrong() {
@@ -2204,18 +1650,11 @@ await LiveKitMedia.turnCameraOn(
       }
 
       const roomReference =
-        database.ref(
-          "rooms/" + currentRoomCode
-        );
+        database.ref("rooms/" + currentRoomCode);
 
-      const snapshot =
-        await roomReference.once("value");
-
-      const room =
-        snapshot.val();
-
-      const uid =
-        room && room.buzzedBy;
+      const snapshot = await roomReference.once("value");
+      const room = snapshot.val();
+      const uid = room && room.buzzedBy;
 
       if (!uid || !room.players[uid]) {
         return;
@@ -2225,13 +1664,9 @@ await LiveKitMedia.turnCameraOn(
         .child("players")
         .child(uid)
         .child("wrong")
-        .transaction(value =>
-          Number(value || 0) + 1
-        );
+        .transaction(value => Number(value || 0) + 1);
 
-      await roomReference
-        .child("buzzedBy")
-        .set(null);
+      await roomReference.child("buzzedBy").set(null);
     }
 
     async function nextQuestion() {
@@ -2240,15 +1675,10 @@ await LiveKitMedia.turnCameraOn(
       }
 
       const roomReference =
-        database.ref(
-          "rooms/" + currentRoomCode
-        );
+        database.ref("rooms/" + currentRoomCode);
 
-      const snapshot =
-        await roomReference.once("value");
-
-      const room =
-        snapshot.val();
+      const snapshot = await roomReference.once("value");
+      const room = snapshot.val();
 
       if (!room) {
         return;
@@ -2257,10 +1687,7 @@ await LiveKitMedia.turnCameraOn(
       const nextIndex =
         Number(room.currentQuestionIndex) + 1;
 
-      if (
-        nextIndex >=
-        room.questionIds.length
-      ) {
+      if (nextIndex >= room.questionIds.length) {
         await roomReference.update({
           status: "finished",
           buzzedBy: null
@@ -2289,78 +1716,48 @@ await LiveKitMedia.turnCameraOn(
           .child("players")
           .child(uid);
 
-      const snapshot =
-        await playerReference.once("value");
-
-      const player =
-        snapshot.val();
+      const snapshot = await playerReference.once("value");
+      const player = snapshot.val();
 
       if (!player) {
         return;
       }
 
       await playerReference.update({
-        limitOverride:
-          player.limitOverride !== true
+        limitOverride: player.limitOverride !== true
       });
-    }
-
-    function updateMediaStatus() {
-      const text =
-        "Microphone: " +
-        (microphoneOn ? "On" : "Off") +
-        " | Camera: " +
-        (cameraOn ? "On" : "Off");
-
-      coachMediaStatus.textContent =
-        text;
-
-      studentMediaStatus.textContent =
-        text;
-    }
-
-    async function connectCompetitionMedia() {
-      if (
-        !currentRoomCode ||
-        !window.LiveKitMedia
-      ) {
-        return;
-      }
-
-      if (LiveKitMedia.connected) {
-        return;
-      }
-
-      try {
-        await LiveKitMedia.connect(
-          "bq-" + currentRoomCode
-        );
-      } catch (error) {
-        console.warn(
-          "LiveKit connection failed:",
-          error
-        );
-      }
     }
 
     async function turnMicrophoneOn() {
       try {
-        if (!currentRoomCode) {
+        if (
+          !currentRoomCode ||
+          !currentUser ||
+          !currentRoomData
+        ) {
           showError("You are not in a room.");
           return;
         }
 
+        const player =
+          currentRoomData.players[currentUser.uid];
+
+        const playerName =
+          player && player.name
+            ? player.name
+            : currentRole || "Participant";
+
         await LiveKitMedia.turnMicrophoneOn(
-          "bq-" + currentRoomCode
+          "bq-" + currentRoomCode,
+          "firebase-" + currentUser.uid,
+          playerName
         );
 
         microphoneOn = true;
         updateMediaStatus();
-
       } catch (error) {
         showError(
-          "Could not turn on microphone: " +
-          error.message
+          "Could not turn on microphone: " + error.message
         );
       }
     }
@@ -2368,36 +1765,45 @@ await LiveKitMedia.turnCameraOn(
     function turnMicrophoneOff() {
       try {
         LiveKitMedia.turnMicrophoneOff();
-
         microphoneOn = false;
         updateMediaStatus();
-
       } catch (error) {
         showError(
-          "Could not turn off microphone: " +
-          error.message
+          "Could not turn off microphone: " + error.message
         );
       }
     }
 
     async function turnCameraOn() {
       try {
-        if (!currentRoomCode) {
+        if (
+          !currentRoomCode ||
+          !currentUser ||
+          !currentRoomData
+        ) {
           showError("You are not in a room.");
           return;
         }
 
+        const player =
+          currentRoomData.players[currentUser.uid];
+
+        const playerName =
+          player && player.name
+            ? player.name
+            : currentRole || "Participant";
+
         await LiveKitMedia.turnCameraOn(
-          "bq-" + currentRoomCode
+          "bq-" + currentRoomCode,
+          "firebase-" + currentUser.uid,
+          playerName
         );
 
         cameraOn = true;
         updateMediaStatus();
-
       } catch (error) {
         showError(
-          "Could not turn on camera: " +
-          error.message
+          "Could not turn on camera: " + error.message
         );
       }
     }
@@ -2405,14 +1811,11 @@ await LiveKitMedia.turnCameraOn(
     function turnCameraOff() {
       try {
         LiveKitMedia.turnCameraOff();
-
         cameraOn = false;
         updateMediaStatus();
-
       } catch (error) {
         showError(
-          "Could not turn off camera: " +
-          error.message
+          "Could not turn off camera: " + error.message
         );
       }
     }
@@ -2443,9 +1846,7 @@ await LiveKitMedia.turnCameraOn(
         }
 
         const roomReference =
-          database.ref(
-            "rooms/" + currentRoomCode
-          );
+          database.ref("rooms/" + currentRoomCode);
 
         if (role === "coach") {
           await roomReference.remove();
@@ -2458,11 +1859,9 @@ await LiveKitMedia.turnCameraOn(
 
         resetLocalState();
         showOnly(homeScreen);
-
       } catch (error) {
         showError(
-          "Could not leave room: " +
-          error.message
+          "Could not leave room: " + error.message
         );
       }
     }
@@ -2474,295 +1873,122 @@ await LiveKitMedia.turnCameraOn(
       microphoneOn = false;
       cameraOn = false;
 
-      coachRoomArea.classList.add("hidden");
-      studentRoomArea.classList.add("hidden");
+      $("coachRoomArea").classList.add("hidden");
+      $("studentRoomArea").classList.add("hidden");
 
       updateMediaStatus();
     }
 
-    document
-      .getElementById("coachButton")
-      .addEventListener(
-        "click",
-        () => {
-          clearError();
-          showOnly(coachScreen);
-        }
+    $("coachButton").addEventListener("click", () => {
+      clearError();
+      showOnly(coachScreen);
+    });
+
+    $("studentButton").addEventListener("click", () => {
+      clearError();
+      showOnly(studentScreen);
+    });
+
+    $("createRoomButton").addEventListener("click", createRoom);
+    $("joinRoomButton").addEventListener("click", joinRoom);
+    $("startCompetitionButton").addEventListener("click", startCompetition);
+
+    $("studentBuzzButton").addEventListener("click", buzzIn);
+
+    $("coachCorrectButton").addEventListener("click", markCorrect);
+    $("coachWrongButton").addEventListener("click", markWrong);
+    $("coachNextButton").addEventListener("click", nextQuestion);
+
+    $("coachMicOnButton").addEventListener("click", turnMicrophoneOn);
+    $("coachMicOffButton").addEventListener("click", turnMicrophoneOff);
+    $("coachCameraOnButton").addEventListener("click", turnCameraOn);
+    $("coachCameraOffButton").addEventListener("click", turnCameraOff);
+
+    $("studentMicOnButton").addEventListener("click", turnMicrophoneOn);
+    $("studentMicOffButton").addEventListener("click", turnMicrophoneOff);
+    $("studentCameraOnButton").addEventListener("click", turnCameraOn);
+    $("studentCameraOffButton").addEventListener("click", turnCameraOff);
+
+    $("leaveCoachButton").addEventListener("click", () => {
+      leaveRoom("coach");
+    });
+
+    $("studentLeaveButton").addEventListener("click", () => {
+      leaveRoom("student");
+    });
+
+    $("coachLeaveCompetitionButton").addEventListener("click", () => {
+      leaveRoom("coach");
+    });
+
+    $("studentLeaveCompetitionButton").addEventListener("click", () => {
+      leaveRoom("student");
+    });
+
+    $("coachBackButton").addEventListener("click", () => {
+      showOnly(homeScreen);
+    });
+
+    $("studentBackButton").addEventListener("click", () => {
+      showOnly(homeScreen);
+    });
+
+    $("coachStartChapter").addEventListener("change", () => {
+      populateVerses(
+        $("coachStartVerse"),
+        Number($("coachStartChapter").value),
+        1
       );
 
-    document
-      .getElementById("studentButton")
-      .addEventListener(
-        "click",
-        () => {
-          clearError();
-          showOnly(studentScreen);
-        }
+      updateCoachPreview();
+    });
+
+    $("coachEndChapter").addEventListener("change", () => {
+      const chapter = Number($("coachEndChapter").value);
+
+      populateVerses(
+        $("coachEndVerse"),
+        chapter,
+        CHAPTER_VERSES[chapter]
       );
 
-    document
-      .getElementById("createRoomButton")
-      .addEventListener(
-        "click",
-        createRoom
-      );
+      updateCoachPreview();
+    });
 
-    document
-      .getElementById("joinRoomButton")
-      .addEventListener(
-        "click",
-        joinRoom
-      );
-
-    document
-      .getElementById("startCompetitionButton")
-      .addEventListener(
-        "click",
-        startCompetition
-      );
-
-    document
-      .getElementById("studentBuzzButton")
-      .addEventListener(
-        "click",
-        buzzIn
-      );
-
-    document
-      .getElementById("coachCorrectButton")
-      .addEventListener(
-        "click",
-        markCorrect
-      );
-
-    document
-      .getElementById("coachWrongButton")
-      .addEventListener(
-        "click",
-        markWrong
-      );
-
-    document
-      .getElementById("coachNextButton")
-      .addEventListener(
-        "click",
-        nextQuestion
-      );
-
-    document
-      .getElementById("coachMicOnButton")
-      .addEventListener(
-        "click",
-        turnMicrophoneOn
-      );
-
-    document
-      .getElementById("coachMicOffButton")
-      .addEventListener(
-        "click",
-        turnMicrophoneOff
-      );
-
-    document
-      .getElementById("coachCameraOnButton")
-      .addEventListener(
-        "click",
-        turnCameraOn
-      );
-
-    document
-      .getElementById("coachCameraOffButton")
-      .addEventListener(
-        "click",
-        turnCameraOff
-      );
-
-    document
-      .getElementById("studentMicOnButton")
-      .addEventListener(
-        "click",
-        turnMicrophoneOn
-      );
-
-    document
-      .getElementById("studentMicOffButton")
-      .addEventListener(
-        "click",
-        turnMicrophoneOff
-      );
-
-    document
-      .getElementById("studentCameraOnButton")
-      .addEventListener(
-        "click",
-        turnCameraOn
-      );
-
-    document
-      .getElementById("studentCameraOffButton")
-      .addEventListener(
-        "click",
-        turnCameraOff
-      );
-
-    document
-      .getElementById("leaveCoachButton")
-      .addEventListener(
-        "click",
-        () => leaveRoom("coach")
-      );
-
-    document
-      .getElementById("studentLeaveButton")
-      .addEventListener(
-        "click",
-        () => leaveRoom("student")
-      );
-
-    document
-      .getElementById("coachLeaveCompetitionButton")
-      .addEventListener(
-        "click",
-        () => leaveRoom("coach")
-      );
-
-    document
-      .getElementById("studentLeaveCompetitionButton")
-      .addEventListener(
-        "click",
-        () => leaveRoom("student")
-      );
-
-    document
-      .getElementById("coachBackButton")
-      .addEventListener(
-        "click",
-        () => showOnly(homeScreen)
-      );
-
-    document
-      .getElementById("studentBackButton")
-      .addEventListener(
-        "click",
-        () => showOnly(homeScreen)
-      );
-
-    document
-      .getElementById("coachStartChapter")
-      .addEventListener(
-        "change",
-        () => {
-          populateVerseSelect(
-            document.getElementById(
-              "coachStartVerse"
-            ),
-            Number(
-              document.getElementById(
-                "coachStartChapter"
-              ).value
-            ),
-            1
-          );
-
-          updateCoachPreview();
-        }
-      );
-
-    document
-      .getElementById("coachEndChapter")
-      .addEventListener(
-        "change",
-        () => {
-          const chapter =
-            Number(
-              document.getElementById(
-                "coachEndChapter"
-              ).value
-            );
-
-          populateVerseSelect(
-            document.getElementById(
-              "coachEndVerse"
-            ),
-            chapter,
-            CHAPTER_VERSES[chapter]
-          );
-
-          updateCoachPreview();
-        }
-      );
-
-    document
-      .getElementById("coachStartVerse")
-      .addEventListener(
-        "change",
-        updateCoachPreview
-      );
-
-    document
-      .getElementById("coachEndVerse")
-      .addEventListener(
-        "change",
-        updateCoachPreview
-      );
-
-    document
-      .getElementById("coachQuestionCount")
-      .addEventListener(
-        "change",
-        updateCoachPreview
-      );
-
-    document
-      .getElementById("maxCorrectSelect")
-      .addEventListener(
-        "change",
-        updateCoachPreview
-      );
-
-    auth.onAuthStateChanged(
-      user => {
-        currentUser = user;
-      }
+    $("coachStartVerse").addEventListener(
+      "change",
+      updateCoachPreview
     );
+
+    $("coachEndVerse").addEventListener(
+      "change",
+      updateCoachPreview
+    );
+
+    $("coachQuestionCount").addEventListener(
+      "change",
+      updateCoachPreview
+    );
+
+    $("maxCorrectSelect").addEventListener(
+      "change",
+      updateCoachPreview
+    );
+
+    auth.onAuthStateChanged(user => {
+      currentUser = user;
+    });
 
     renderCoachTypes();
 
-    populateChapterSelect(
-      document.getElementById(
-        "coachStartChapter"
-      )
-    );
+    populateChapters($("coachStartChapter"));
+    populateChapters($("coachEndChapter"));
 
-    populateChapterSelect(
-      document.getElementById(
-        "coachEndChapter"
-      )
-    );
+    $("coachStartChapter").value = "1";
+    $("coachEndChapter").value = "21";
 
-    document.getElementById(
-      "coachStartChapter"
-    ).value = "1";
-
-    document.getElementById(
-      "coachEndChapter"
-    ).value = "21";
-
-    populateVerseSelect(
-      document.getElementById(
-        "coachStartVerse"
-      ),
-      1,
-      1
-    );
-
-    populateVerseSelect(
-      document.getElementById(
-        "coachEndVerse"
-      ),
-      21,
-      25
-    );
+    populateVerses($("coachStartVerse"), 1, 1);
+    populateVerses($("coachEndVerse"), 21, 25);
 
     updateCoachPreview();
     updateMediaStatus();
