@@ -61,47 +61,35 @@ if (
     return this.room;
   },
 
-  async enableMicrophone() {
-    if (!this.room) {
-      throw new Error("LiveKit room is not connected.");
-    }
+ async enableAnswerMedia() {
+  if (!this.room) {
+    throw new Error("LiveKit room is not connected.");
+  }
 
-    const tracks =
-      await LivekitClient.createLocalTracks({
-        audio: true,
-        video: false
-      });
+  const tracks =
+    await LivekitClient.createLocalTracks({
+      audio: true,
+      video: true
+    });
 
-    for (const track of tracks) {
-      await this.room.localParticipant
-        .publishTrack(track);
+  for (const track of tracks) {
+    await this.room.localParticipant.publishTrack(track);
+    this.localTracks.push(track);
+  }
 
-      this.localTracks.push(track);
-    }
+  console.log("Answer microphone and camera enabled.");
+},
 
-    console.log("Microphone enabled.");
-  },
+disableAnswerMedia() {
+  this.localTracks.forEach(track => {
+    track.stop();
+    track.detach();
+  });
 
-  async enableCamera() {
-    if (!this.room) {
-      throw new Error("LiveKit room is not connected.");
-    }
+  this.localTracks = [];
 
-    const tracks =
-      await LivekitClient.createLocalTracks({
-        audio: false,
-        video: true
-      });
-
-    for (const track of tracks) {
-      await this.room.localParticipant
-        .publishTrack(track);
-
-      this.localTracks.push(track);
-    }
-
-    console.log("Camera enabled.");
-  },
+  console.log("Answer microphone and camera disabled.");
+},
 
   disableMicrophone() {
     this.localTracks.forEach(track => {
