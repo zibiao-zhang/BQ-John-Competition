@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>BQ John Competition</title>
 
   <style>
@@ -36,7 +35,7 @@
 
     .app {
       width: 100%;
-      max-width: 850px;
+      max-width: 900px;
       margin: 0 auto;
       padding: 20px;
     }
@@ -52,13 +51,8 @@
       font-size: 32px;
     }
 
-    h2 {
-      margin-top: 0;
-      color: var(--blue-dark);
-    }
-
+    h2,
     h3 {
-      margin-bottom: 8px;
       color: var(--blue-dark);
     }
 
@@ -86,14 +80,14 @@
     select,
     button {
       width: 100%;
-      min-height: 46px;
+      min-height: 44px;
       border-radius: 10px;
       font-size: 16px;
     }
 
     input,
     select {
-      padding: 10px;
+      padding: 9px 10px;
       border: 1px solid var(--border);
       background: white;
       color: var(--dark);
@@ -105,27 +99,20 @@
       padding: 10px 14px;
       margin-top: 12px;
       font-weight: bold;
-      transition: 0.15s ease;
     }
 
     button:hover {
       filter: brightness(0.96);
-      transform: translateY(-1px);
     }
 
     button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
-      transform: none;
     }
 
     .primary {
       background: var(--blue);
       color: white;
-    }
-
-    .primary:hover {
-      background: var(--blue-dark);
     }
 
     .secondary {
@@ -149,8 +136,52 @@
       color: #344054;
     }
 
+    .small-button {
+      width: auto;
+      min-height: 34px;
+      margin: 0;
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+
     .hidden {
       display: none !important;
+    }
+
+    .reference-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 10px;
+    }
+
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .type-option {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: normal;
+      margin: 0;
+    }
+
+    .type-option input {
+      width: 16px;
+      min-height: 16px;
+    }
+
+    .type-code {
+      color: var(--blue);
+      font-weight: bold;
     }
 
     .room-code {
@@ -167,7 +198,7 @@
 
     .status {
       padding: 12px;
-      margin-top: 14px;
+      margin-top: 12px;
       border-radius: 9px;
       background: #f9fafb;
       color: var(--gray);
@@ -180,16 +211,6 @@
       border-radius: 9px;
       background: var(--light-red);
       color: var(--red);
-      line-height: 1.5;
-    }
-
-    .success {
-      padding: 12px;
-      margin-top: 14px;
-      border-radius: 9px;
-      background: var(--light-green);
-      color: var(--green);
-      line-height: 1.5;
     }
 
     .player-list {
@@ -199,7 +220,7 @@
     }
 
     .player-item {
-      padding: 13px;
+      padding: 12px;
       margin-top: 8px;
       border: 1px solid var(--border);
       border-radius: 9px;
@@ -231,6 +252,13 @@
       color: var(--gray);
       font-size: 13px;
       font-weight: normal;
+    }
+
+    .player-action {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 8px;
     }
 
     .question-box {
@@ -272,42 +300,43 @@
       text-align: center;
     }
 
+    .scoreboard {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--blue-dark);
+      font-size: 14px;
+    }
+
+    td {
+      font-size: 15px;
+    }
+
     .button-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
 
-    .scoreboard {
-      overflow-x: auto;
-    }
-
-    .scoreboard table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-
-    .scoreboard th,
-    .scoreboard td {
-      padding: 10px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-    }
-
-    .scoreboard th {
-      color: var(--blue-dark);
-      font-size: 14px;
-    }
-
-    .scoreboard td {
-      font-size: 15px;
-    }
-
-    .coach-controls {
-      margin-top: 18px;
-      padding-top: 18px;
-      border-top: 1px solid var(--border);
+    @media (max-width: 680px) {
+      .type-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     @media (max-width: 580px) {
@@ -323,15 +352,13 @@
         font-size: 27px;
       }
 
-      .room-code {
-        font-size: 27px;
-      }
-
       .question-text {
         font-size: 20px;
       }
 
-      .button-row {
+      .reference-grid,
+      .button-row,
+      .type-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -361,9 +388,42 @@
       </button>
     </section>
 
-    <!-- COACH LOBBY -->
+    <!-- COACH SETUP -->
     <section id="coachScreen" class="card hidden">
-      <h2>Coach Room</h2>
+      <h2>Coach Setup</h2>
+
+      <label>Start Reference</label>
+
+      <div class="reference-grid">
+        <select id="coachStartChapter"></select>
+        <select id="coachStartVerse"></select>
+      </div>
+
+      <label>End Reference</label>
+
+      <div class="reference-grid">
+        <select id="coachEndChapter"></select>
+        <select id="coachEndVerse"></select>
+      </div>
+
+      <label>Question Types</label>
+
+      <div id="coachTypeGrid" class="type-grid"></div>
+
+      <label for="coachQuestionCount">
+        Number of Questions
+      </label>
+
+      <select id="coachQuestionCount">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="15">15</option>
+        <option value="20" selected>20</option>
+        <option value="25">25</option>
+        <option value="30">30</option>
+        <option value="50">50</option>
+        <option value="all">All Available</option>
+      </select>
 
       <label for="maxCorrectSelect">
         Maximum Correct Answers per Student
@@ -379,6 +439,8 @@
         <option value="10" selected>10</option>
       </select>
 
+      <div id="coachSetupPreview" class="status"></div>
+
       <button id="createRoomButton" class="primary">
         Create New Room
       </button>
@@ -389,8 +451,6 @@
         </div>
 
         <div id="coachRoomCode" class="room-code"></div>
-
-        <div id="coachSettings" class="status"></div>
 
         <h3>Players</h3>
 
@@ -441,9 +501,7 @@
       </button>
 
       <div id="studentRoomArea" class="hidden">
-        <div id="studentStatus" class="status">
-          You have joined the room. Please wait for the coach.
-        </div>
+        <div id="studentStatus" class="status"></div>
 
         <div id="studentRoomCode" class="room-code"></div>
 
@@ -475,7 +533,7 @@
 
       <div id="coachBuzzedBanner" class="buzzed-banner hidden"></div>
 
-      <div class="coach-controls">
+      <div class="button-row">
         <button id="coachCorrectButton" class="green" disabled>
           Correct
         </button>
@@ -483,15 +541,15 @@
         <button id="coachWrongButton" class="red" disabled>
           Wrong
         </button>
-
-        <button id="coachNextButton" class="primary" disabled>
-          Next Question
-        </button>
-
-        <button id="coachLeaveCompetitionButton" class="gray-button">
-          Leave Room
-        </button>
       </div>
+
+      <button id="coachNextButton" class="primary" disabled>
+        Next Question
+      </button>
+
+      <button id="coachLeaveCompetitionButton" class="gray-button">
+        Leave Room
+      </button>
 
       <h3>Scoreboard</h3>
 
@@ -503,9 +561,9 @@
               <th>Correct</th>
               <th>Wrong</th>
               <th>Status</th>
+              <th>Action</th>
             </tr>
           </thead>
-
           <tbody id="coachScoreboardBody"></tbody>
         </table>
       </div>
@@ -545,7 +603,6 @@
               <th>Status</th>
             </tr>
           </thead>
-
           <tbody id="studentScoreboardBody"></tbody>
         </table>
       </div>
@@ -555,12 +612,11 @@
 
   </main>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
 
-  <!-- Firebase configuration -->
   <script src="firebase-config.js"></script>
 
   <!-- Question bank -->
@@ -618,6 +674,46 @@
       CVRMA: "Chapter-and-Verse Reference, Multiple Answer"
     };
 
+    const CHAPTER_VERSES = {
+      1: 51,
+      2: 25,
+      3: 36,
+      4: 54,
+      5: 47,
+      6: 71,
+      7: 53,
+      8: 59,
+      9: 41,
+      10: 42,
+      11: 57,
+      12: 50,
+      13: 38,
+      14: 31,
+      15: 27,
+      16: 33,
+      17: 26,
+      18: 40,
+      19: 42,
+      20: 31,
+      21: 25
+    };
+
+    const QUESTION_TYPE_ORDER = [
+      "INT",
+      "MA",
+      "Q",
+      "FTV",
+      "CR",
+      "CVR",
+      "SIT",
+      "F2V",
+      "Q2V",
+      "FT",
+      "FTN",
+      "CRMA",
+      "CVRMA"
+    ];
+
     let currentUser = null;
     let currentRoomCode = null;
     let currentRole = null;
@@ -662,9 +758,6 @@
 
     const studentStatus =
       document.getElementById("studentStatus");
-
-    const coachSettings =
-      document.getElementById("coachSettings");
 
     const coachCompetitionStatus =
       document.getElementById("coachCompetitionStatus");
@@ -750,21 +843,14 @@
       let code = "";
 
       for (let i = 0; i < 6; i++) {
-        const index =
+        code += characters[
           Math.floor(
             Math.random() * characters.length
-          );
-
-        code += characters[index];
+          )
+        ];
       }
 
       return code;
-    }
-
-    function getQuestionById(id) {
-      return QUESTION_BANK.find(
-        question => question.id === id
-      );
     }
 
     function shuffle(array) {
@@ -792,145 +878,463 @@
       return copied;
     }
 
+    function getQuestionById(id) {
+      return QUESTION_BANK.find(
+        question => question.id === id
+      );
+    }
+
+    function getPosition(chapter, verse) {
+      return chapter * 1000 + verse;
+    }
+
+    function getSelectedTypes() {
+      return [
+        ...document.querySelectorAll(
+          'input[name="coachType"]:checked'
+        )
+      ].map(input => input.value);
+    }
+
+    function renderCoachTypes() {
+      const grid =
+        document.getElementById(
+          "coachTypeGrid"
+        );
+
+      grid.innerHTML = "";
+
+      const availableTypes = [
+        ...new Set(
+          QUESTION_BANK
+            .map(question => question.type)
+            .filter(Boolean)
+        )
+      ];
+
+      QUESTION_TYPE_ORDER
+        .filter(type =>
+          availableTypes.includes(type)
+        )
+        .forEach(type => {
+          const label =
+            document.createElement("label");
+
+          label.className =
+            "type-option";
+
+          const checkbox =
+            document.createElement("input");
+
+          checkbox.type = "checkbox";
+          checkbox.name = "coachType";
+          checkbox.value = type;
+          checkbox.checked = true;
+
+          checkbox.addEventListener(
+            "change",
+            updateCoachPreview
+          );
+
+          const code =
+            document.createElement("span");
+
+          code.className =
+            "type-code";
+
+          code.textContent =
+            type;
+
+          const name =
+            document.createElement("span");
+
+          name.textContent =
+            TYPE_NAMES[type] || type;
+
+          label.appendChild(checkbox);
+          label.appendChild(code);
+          label.appendChild(name);
+
+          grid.appendChild(label);
+        });
+    }
+
+    function populateChapterSelect(selectElement) {
+      selectElement.innerHTML = "";
+
+      for (let chapter = 1; chapter <= 21; chapter++) {
+        const option =
+          document.createElement("option");
+
+        option.value =
+          chapter;
+
+        option.textContent =
+          "John " + chapter;
+
+        selectElement.appendChild(option);
+      }
+    }
+
+    function populateVerseSelect(
+      selectElement,
+      chapter,
+      selectedVerse = 1
+    ) {
+      selectElement.innerHTML = "";
+
+      const totalVerses =
+        CHAPTER_VERSES[chapter];
+
+      for (
+        let verse = 1;
+        verse <= totalVerses;
+        verse++
+      ) {
+        const option =
+          document.createElement("option");
+
+        option.value =
+          verse;
+
+        option.textContent =
+          "Verse " + verse;
+
+        selectElement.appendChild(option);
+      }
+
+      selectElement.value =
+        Math.min(
+          selectedVerse,
+          totalVerses
+        );
+    }
+
+    function getCoachSettings() {
+      return {
+        startChapter: Number(
+          document.getElementById(
+            "coachStartChapter"
+          ).value
+        ),
+
+        startVerse: Number(
+          document.getElementById(
+            "coachStartVerse"
+          ).value
+        ),
+
+        endChapter: Number(
+          document.getElementById(
+            "coachEndChapter"
+          ).value
+        ),
+
+        endVerse: Number(
+          document.getElementById(
+            "coachEndVerse"
+          ).value
+        ),
+
+        questionTypes:
+          getSelectedTypes(),
+
+        questionCount:
+          document.getElementById(
+            "coachQuestionCount"
+          ).value === "all"
+            ? "all"
+            : Number(
+                document.getElementById(
+                  "coachQuestionCount"
+                ).value
+              ),
+
+        maxCorrect: Number(
+          document.getElementById(
+            "maxCorrectSelect"
+          ).value
+        )
+      };
+    }
+
+    function getQuestionsForSettings(settings) {
+      const start =
+        getPosition(
+          settings.startChapter,
+          settings.startVerse
+        );
+
+      const end =
+        getPosition(
+          settings.endChapter,
+          settings.endVerse
+        );
+
+      return QUESTION_BANK.filter(question => {
+        const position =
+          getPosition(
+            question.chapter,
+            question.verse
+          );
+
+        return (
+          position >= start &&
+          position <= end &&
+          settings.questionTypes.includes(
+            question.type
+          )
+        );
+      });
+    }
+
+    function updateCoachPreview() {
+      const settings =
+        getCoachSettings();
+
+      const preview =
+        document.getElementById(
+          "coachSetupPreview"
+        );
+
+      if (
+        getPosition(
+          settings.startChapter,
+          settings.startVerse
+        ) >
+        getPosition(
+          settings.endChapter,
+          settings.endVerse
+        )
+      ) {
+        preview.textContent =
+          "Invalid reference range.";
+        return;
+      }
+
+      if (settings.questionTypes.length === 0) {
+        preview.textContent =
+          "Please select at least one question type.";
+        return;
+      }
+
+      const available =
+        getQuestionsForSettings(settings).length;
+
+      preview.textContent =
+        "Range: John " +
+        settings.startChapter +
+        ":" +
+        settings.startVerse +
+        " - John " +
+        settings.endChapter +
+        ":" +
+        settings.endVerse +
+        ". Available: " +
+        available +
+        ". Max correct per student: " +
+        settings.maxCorrect +
+        ".";
+    }
+
     function renderPlayers(listElement, players) {
       listElement.innerHTML = "";
 
       if (!players) {
-        const emptyItem =
-          document.createElement("li");
-
-        emptyItem.textContent =
-          "No players have joined yet.";
-
-        listElement.appendChild(emptyItem);
-        return;
-      }
-
-      Object.values(players).forEach(player => {
         const item =
           document.createElement("li");
 
         item.className =
           "player-item";
 
-        const role =
-          document.createElement("span");
-
-        role.className =
-          "player-role";
-
-        role.textContent =
-          player.role === "coach"
-            ? "Coach"
-            : "Student";
-
-        const score =
-          document.createElement("span");
-
-        score.className =
-          "player-score";
-
-        score.textContent =
-          "Correct: " +
-          (player.correct || 0) +
-          " | Wrong: " +
-          (player.wrong || 0);
-
         item.textContent =
-          player.name || "Unnamed player";
-
-        item.appendChild(role);
-        item.appendChild(score);
+          "No players have joined yet.";
 
         listElement.appendChild(item);
-      });
-    }
-
-    function renderScoreboard(
-      tableBody,
-      players,
-      room
-    ) {
-      tableBody.innerHTML = "";
-
-      if (!players) {
         return;
       }
 
-      const maxCorrect =
-        Number(
-          room.settings &&
-          room.settings.maxCorrect
-        ) || 10;
+      Object.entries(players).forEach(
+        ([uid, player]) => {
+          const item =
+            document.createElement("li");
 
-      const entries =
-        Object.entries(players)
-          .filter(([, player]) =>
+          item.className =
+            "player-item";
+
+          if (
+            currentRoomData &&
+            currentRoomData.buzzedBy === uid
+          ) {
+            item.classList.add("buzzed");
+          }
+
+          const maxCorrect =
+            Number(
+              currentRoomData &&
+              currentRoomData.settings
+                ? currentRoomData.settings.maxCorrect
+                : 10
+            );
+
+          const correct =
+            Number(player.correct || 0);
+
+          if (correct >= maxCorrect) {
+            item.classList.add("limit-reached");
+          }
+
+          item.textContent =
+            player.name || "Unnamed";
+
+          const role =
+            document.createElement("span");
+
+          role.className =
+            "player-role";
+
+          role.textContent =
+            player.role === "coach"
+              ? "Coach"
+              : "Student";
+
+          const score =
+            document.createElement("span");
+
+          score.className =
+            "player-score";
+
+          score.textContent =
+            "Correct: " +
+            correct +
+            " / " +
+            maxCorrect +
+            " | Wrong: " +
+            Number(player.wrong || 0);
+
+          item.appendChild(role);
+          item.appendChild(score);
+
+          if (
+            currentRole === "coach" &&
             player.role === "student"
-          )
-          .sort(([, first], [, second]) =>
-            (second.correct || 0) -
-            (first.correct || 0)
-          );
+          ) {
+            const action =
+              document.createElement("div");
 
-      entries.forEach(([uid, player]) => {
-        const row =
-          document.createElement("tr");
+            action.className =
+              "player-action";
 
-        const nameCell =
-          document.createElement("td");
+            const override =
+              player.limitOverride === true;
 
-        const correctCell =
-          document.createElement("td");
+            const actionButton =
+              document.createElement("button");
 
-        const wrongCell =
-          document.createElement("td");
+            actionButton.className =
+              override
+                ? "small-button red"
+                : "small-button secondary";
 
-        const statusCell =
-          document.createElement("td");
+            actionButton.textContent =
+              override
+                ? "Lock"
+                : "Unlock";
 
-        const correct =
-          Number(player.correct || 0);
+            actionButton.addEventListener(
+              "click",
+              () => {
+                toggleStudentLimit(uid);
+              }
+            );
 
-        nameCell.textContent =
-          player.name || "Unnamed";
+            action.appendChild(actionButton);
+            item.appendChild(action);
+          }
 
-        correctCell.textContent =
-          correct + " / " + maxCorrect;
-
-        wrongCell.textContent =
-          Number(player.wrong || 0);
-
-        if (correct >= maxCorrect) {
-          statusCell.textContent =
-            "Limit reached";
-        } else if (
-          room.buzzedBy === uid
-        ) {
-          statusCell.textContent =
-            "Buzzed in";
-        } else {
-          statusCell.textContent =
-            "Ready";
+          listElement.appendChild(item);
         }
-
-        row.appendChild(nameCell);
-        row.appendChild(correctCell);
-        row.appendChild(wrongCell);
-        row.appendChild(statusCell);
-
-        tableBody.appendChild(row);
-      });
+      );
     }
 
-    function renderCompetition(room) {
+    function renderScoreboard(body, room) {
+      body.innerHTML = "";
+
+      const players =
+        room.players || {};
+
+      Object.entries(players)
+        .filter(([, player]) =>
+          player.role === "student"
+        )
+        .sort(([, a], [, b]) =>
+          Number(b.correct || 0) -
+          Number(a.correct || 0)
+        )
+        .forEach(([uid, player]) => {
+          const row =
+            document.createElement("tr");
+
+          const correct =
+            Number(player.correct || 0);
+
+          const maxCorrect =
+            Number(room.settings.maxCorrect);
+
+          const nameCell =
+            document.createElement("td");
+
+          const correctCell =
+            document.createElement("td");
+
+          const wrongCell =
+            document.createElement("td");
+
+          const statusCell =
+            document.createElement("td");
+
+          nameCell.textContent =
+            player.name;
+
+          correctCell.textContent =
+            correct + " / " + maxCorrect;
+
+          wrongCell.textContent =
+            Number(player.wrong || 0);
+
+          if (player.limitOverride === true) {
+            statusCell.textContent =
+              "Manual override";
+          } else if (correct >= maxCorrect) {
+            statusCell.textContent =
+              "Limit reached";
+          } else if (room.buzzedBy === uid) {
+            statusCell.textContent =
+              "Buzzed in";
+          } else {
+            statusCell.textContent =
+              "Ready";
+          }
+
+          row.appendChild(nameCell);
+          row.appendChild(correctCell);
+          row.appendChild(wrongCell);
+          row.appendChild(statusCell);
+
+          body.appendChild(row);
+        });
+    }
+
+    function renderRoom(room) {
       if (!room) {
-        showError("This room no longer exists.");
-        resetLocalRoomState();
+        showError("Room no longer exists.");
+        resetLocalState();
+        showOnly(homeScreen);
         return;
       }
 
-      currentRoomData = room;
+      currentRoomData =
+        room;
 
       const players =
         room.players || {};
@@ -947,65 +1351,66 @@
 
       renderScoreboard(
         coachScoreboardBody,
-        players,
         room
       );
 
       renderScoreboard(
         studentScoreboardBody,
-        players,
         room
       );
 
-      const maxCorrect =
-        Number(
-          room.settings &&
-          room.settings.maxCorrect
-        ) || 10;
+      if (currentRole === "coach") {
+        if (
+          room.status === "started" ||
+          room.status === "finished"
+        ) {
+          showOnly(coachCompetitionScreen);
+        } else {
+          showOnly(coachScreen);
+        }
+      }
 
-      coachSettings.textContent =
-        "Maximum correct answers per student: " +
-        maxCorrect;
+      if (currentRole === "student") {
+        if (
+          room.status === "started" ||
+          room.status === "finished"
+        ) {
+          showOnly(studentCompetitionScreen);
+        } else {
+          showOnly(studentScreen);
+        }
+      }
 
       if (room.status === "waiting") {
         coachStatus.textContent =
           "Waiting for students.";
+
         studentStatus.textContent =
           "Waiting for the coach to start.";
-        coachCompetitionStatus.textContent =
-          "Competition is waiting to start.";
-        studentCompetitionStatus.textContent =
-          "Competition is waiting to start.";
       }
 
       if (room.status === "started") {
-        coachStatus.textContent =
-          "Competition is in progress.";
-        studentStatus.textContent =
-          "Competition is in progress.";
         coachCompetitionStatus.textContent =
           "Competition is in progress.";
+
         studentCompetitionStatus.textContent =
           "Competition is in progress.";
       }
 
       if (room.status === "finished") {
-        coachStatus.textContent =
-          "Competition finished.";
-        studentStatus.textContent =
-          "Competition finished.";
         coachCompetitionStatus.textContent =
           "Competition finished.";
+
         studentCompetitionStatus.textContent =
           "Competition finished.";
       }
 
-      renderCurrentQuestion(room);
+      renderQuestion(room);
       renderBuzzState(room);
-      updateControls(room);
+      updateButtons(room);
     }
 
-    function renderCurrentQuestion(room) {
+    function renderQuestion(room) {
       if (
         room.status !== "started" ||
         !Array.isArray(room.questionIds) ||
@@ -1055,28 +1460,38 @@
         question.question;
 
       coachQuestionReference.textContent =
-        "Reference: " + question.reference;
+        "Reference: " +
+        question.reference;
 
       studentQuestionReference.textContent =
-        "Reference: " + question.reference;
+        "Reference: " +
+        question.reference;
 
-      coachQuestionBox.classList.remove("hidden");
-      studentQuestionBox.classList.remove("hidden");
+      coachQuestionBox.classList.remove(
+        "hidden"
+      );
+
+      studentQuestionBox.classList.remove(
+        "hidden"
+      );
     }
 
     function renderBuzzState(room) {
-      const buzzedBy =
-        room.buzzedBy;
+      if (!room.buzzedBy) {
+        coachBuzzedBanner.classList.add(
+          "hidden"
+        );
 
-      if (!buzzedBy) {
-        coachBuzzedBanner.classList.add("hidden");
-        studentBuzzedBanner.classList.add("hidden");
+        studentBuzzedBanner.classList.add(
+          "hidden"
+        );
+
         return;
       }
 
       const player =
         room.players &&
-        room.players[buzzedBy];
+        room.players[room.buzzedBy];
 
       const name =
         player && player.name
@@ -1089,28 +1504,32 @@
       studentBuzzedBanner.textContent =
         name + " is answering.";
 
-      coachBuzzedBanner.classList.remove("hidden");
-      studentBuzzedBanner.classList.remove("hidden");
+      coachBuzzedBanner.classList.remove(
+        "hidden"
+      );
+
+      studentBuzzedBanner.classList.remove(
+        "hidden"
+      );
     }
 
-    function updateControls(room) {
+    function updateButtons(room) {
       const buzzedBy =
         room.buzzedBy;
 
-      const currentPlayer =
+      const player =
         currentUser &&
         room.players &&
         room.players[currentUser.uid];
 
       const maxCorrect =
-        Number(
-          room.settings &&
-          room.settings.maxCorrect
-        ) || 10;
+        Number(room.settings.maxCorrect);
 
       const reachedLimit =
-        currentPlayer &&
-        Number(currentPlayer.correct || 0) >= maxCorrect;
+        currentRole === "student" &&
+        player &&
+        Number(player.correct || 0) >= maxCorrect &&
+        player.limitOverride !== true;
 
       const canBuzz =
         currentRole === "student" &&
@@ -1133,14 +1552,17 @@
       }
 
       coachCorrectButton.disabled =
-        !buzzedBy ||
-        room.status !== "started";
+        currentRole !== "coach" ||
+        room.status !== "started" ||
+        !buzzedBy;
 
       coachWrongButton.disabled =
-        !buzzedBy ||
-        room.status !== "started";
+        currentRole !== "coach" ||
+        room.status !== "started" ||
+        !buzzedBy;
 
       coachNextButton.disabled =
+        currentRole !== "coach" ||
         room.status !== "started";
     }
 
@@ -1160,7 +1582,7 @@
       currentRoomListener.on(
         "value",
         snapshot => {
-          renderCompetition(
+          renderRoom(
             snapshot.val()
           );
         }
@@ -1184,19 +1606,42 @@
     async function createRoom() {
       clearError();
 
+      const settings =
+        getCoachSettings();
+
+      if (
+        getPosition(
+          settings.startChapter,
+          settings.startVerse
+        ) >
+        getPosition(
+          settings.endChapter,
+          settings.endVerse
+        )
+      ) {
+        showError("Invalid reference range.");
+        return;
+      }
+
+      if (settings.questionTypes.length === 0) {
+        showError("Select at least one question type.");
+        return;
+      }
+
+      const available =
+        getQuestionsForSettings(settings);
+
+      if (available.length === 0) {
+        showError("No questions match this selection.");
+        return;
+      }
+
       try {
         const user =
           await signInAnonymously();
 
         currentRole =
           "coach";
-
-        const maxCorrect =
-          Number(
-            document.getElementById(
-              "maxCorrectSelect"
-            ).value
-          );
 
         let roomCode;
         let roomExists = true;
@@ -1214,32 +1659,31 @@
             snapshot.exists();
         }
 
-        const roomData = {
+        const room = {
           hostUid: user.uid,
           status: "waiting",
-          currentQuestionIndex: -1,
           questionIds: [],
+          currentQuestionIndex: -1,
           buzzedBy: null,
-          settings: {
-            maxCorrect: maxCorrect
-          },
+          settings: settings,
           createdAt:
             firebase.database.ServerValue.TIMESTAMP,
           players: {}
         };
 
-        roomData.players[user.uid] = {
+        room.players[user.uid] = {
           name: "Coach",
           role: "coach",
-          joinedAt:
-            firebase.database.ServerValue.TIMESTAMP,
           correct: 0,
-          wrong: 0
+          wrong: 0,
+          limitOverride: false,
+          joinedAt:
+            firebase.database.ServerValue.TIMESTAMP
         };
 
         await database.ref(
           "rooms/" + roomCode
-        ).set(roomData);
+        ).set(room);
 
         coachRoomCode.textContent =
           roomCode;
@@ -1254,6 +1698,80 @@
       } catch (error) {
         showError(
           "Could not create room: " +
+          error.message
+        );
+      }
+    }
+
+    async function startCompetition() {
+      clearError();
+
+      if (!currentRoomCode) {
+        showError("Create a room first.");
+        return;
+      }
+
+      try {
+        const roomReference =
+          database.ref(
+            "rooms/" + currentRoomCode
+          );
+
+        const snapshot =
+          await roomReference.once("value");
+
+        const room =
+          snapshot.val();
+
+        if (!room) {
+          showError("Room no longer exists.");
+          return;
+        }
+
+        const available =
+          getQuestionsForSettings(
+            room.settings
+          );
+
+        if (available.length === 0) {
+          showError("No questions match the settings.");
+          return;
+        }
+
+        const requested =
+          room.settings.questionCount === "all"
+            ? available.length
+            : Number(
+                room.settings.questionCount
+              );
+
+        const amount =
+          Math.min(
+            requested,
+            available.length
+          );
+
+        const selected =
+          shuffle(available)
+            .slice(0, amount);
+
+        const questionIds =
+          selected.map(
+            question => question.id
+          );
+
+        await roomReference.update({
+          status: "started",
+          questionIds: questionIds,
+          currentQuestionIndex: 0,
+          buzzedBy: null,
+          startedAt:
+            firebase.database.ServerValue.TIMESTAMP
+        });
+
+      } catch (error) {
+        showError(
+          "Could not start competition: " +
           error.message
         );
       }
@@ -1278,10 +1796,7 @@
       }
 
       if (!/^[A-Z0-9]{6}$/.test(roomCode)) {
-        showError(
-          "Room code must contain 6 letters or numbers."
-        );
-
+        showError("Room code must be 6 characters.");
         return;
       }
 
@@ -1289,32 +1804,29 @@
         const user =
           await signInAnonymously();
 
-        currentRole =
-          "student";
-
         const roomReference =
           database.ref(
             "rooms/" + roomCode
           );
 
-        const roomSnapshot =
+        const snapshot =
           await roomReference.once("value");
 
-        if (!roomSnapshot.exists()) {
+        const room =
+          snapshot.val();
+
+        if (!room) {
           showError("Room not found.");
           return;
         }
 
-        const room =
-          roomSnapshot.val();
-
         if (room.status !== "waiting") {
-          showError(
-            "This competition has already started."
-          );
-
+          showError("Competition has already started.");
           return;
         }
+
+        currentRole =
+          "student";
 
         await roomReference
           .child("players")
@@ -1322,11 +1834,15 @@
           .set({
             name: name,
             role: "student",
-            joinedAt:
-              firebase.database.ServerValue.TIMESTAMP,
             correct: 0,
-            wrong: 0
+            wrong: 0,
+            limitOverride: false,
+            joinedAt:
+              firebase.database.ServerValue.TIMESTAMP
           });
+
+        currentRoomCode =
+          roomCode;
 
         studentRoomCode.textContent =
           roomCode;
@@ -1346,45 +1862,6 @@
       }
     }
 
-    async function startCompetition() {
-      clearError();
-
-      if (!currentRoomCode) {
-        showError("Please create a room first.");
-        return;
-      }
-
-      try {
-        const questions =
-          shuffle(QUESTION_BANK)
-            .slice(0, 20);
-
-        const questionIds =
-          questions.map(
-            question => question.id
-          );
-
-        await database
-          .ref("rooms/" + currentRoomCode)
-          .update({
-            status: "started",
-            currentQuestionIndex: 0,
-            questionIds: questionIds,
-            buzzedBy: null,
-            startedAt:
-              firebase.database.ServerValue.TIMESTAMP
-          });
-
-        showOnly(coachCompetitionScreen);
-
-      } catch (error) {
-        showError(
-          "Could not start competition: " +
-          error.message
-        );
-      }
-    }
-
     async function buzzIn() {
       if (!currentRoomCode || !currentUser) {
         return;
@@ -1396,45 +1873,44 @@
             "rooms/" + currentRoomCode
           );
 
-        const roomSnapshot =
+        const snapshot =
           await roomReference.once("value");
 
         const room =
-          roomSnapshot.val();
-
-        if (!room || room.status !== "started") {
-          return;
-        }
+          snapshot.val();
 
         const player =
+          room &&
           room.players &&
           room.players[currentUser.uid];
 
         const maxCorrect =
-          Number(
-            room.settings &&
-            room.settings.maxCorrect
-          ) || 10;
+          Number(room.settings.maxCorrect);
 
         if (
+          !room ||
+          room.status !== "started" ||
+          room.buzzedBy ||
           !player ||
-          Number(player.correct || 0) >= maxCorrect
+          (
+            Number(player.correct || 0) >= maxCorrect &&
+            player.limitOverride !== true
+          )
         ) {
           return;
         }
 
-        const buzzReference =
-          roomReference.child("buzzedBy");
+        await roomReference
+          .child("buzzedBy")
+          .transaction(
+            value => {
+              if (value === null) {
+                return currentUser.uid;
+              }
 
-        await buzzReference.transaction(
-          currentValue => {
-            if (currentValue === null) {
-              return currentUser.uid;
+              return;
             }
-
-            return;
-          }
-        );
+          );
 
       } catch (error) {
         showError(
@@ -1449,66 +1925,52 @@
         return;
       }
 
-      try {
-        const roomReference =
-          database.ref(
-            "rooms/" + currentRoomCode
-          );
+      const roomReference =
+        database.ref(
+          "rooms/" + currentRoomCode
+        );
 
-        const snapshot =
-          await roomReference.once("value");
+      const snapshot =
+        await roomReference.once("value");
 
-        const room =
-          snapshot.val();
+      const room =
+        snapshot.val();
 
-        const uid =
-          room && room.buzzedBy;
+      const uid =
+        room && room.buzzedBy;
 
-        if (!uid || !room.players[uid]) {
-          return;
-        }
+      if (!uid || !room.players[uid]) {
+        return;
+      }
 
-        const maxCorrect =
-          Number(
-            room.settings &&
-            room.settings.maxCorrect
-          ) || 10;
+      const maxCorrect =
+        Number(room.settings.maxCorrect);
 
-        const playerReference =
-          roomReference
-            .child("players")
-            .child(uid);
-
-        await playerReference.transaction(
-          player => {
-            if (!player) {
-              return player;
-            }
-
-            const correct =
-              Number(player.correct || 0);
-
-            if (correct >= maxCorrect) {
-              return player;
-            }
-
-            player.correct =
-              correct + 1;
-
+      await roomReference
+        .child("players")
+        .child(uid)
+        .transaction(player => {
+          if (!player) {
             return player;
           }
-        );
 
-        await roomReference
-          .child("buzzedBy")
-          .set(null);
+          const correct =
+            Number(player.correct || 0);
 
-      } catch (error) {
-        showError(
-          "Could not mark correct: " +
-          error.message
-        );
-      }
+          if (
+            correct < maxCorrect ||
+            player.limitOverride === true
+          ) {
+            player.correct =
+              correct + 1;
+          }
+
+          return player;
+        });
+
+      await roomReference
+        .child("buzzedBy")
+        .set(null);
     }
 
     async function markWrong() {
@@ -1516,43 +1978,36 @@
         return;
       }
 
-      try {
-        const roomReference =
-          database.ref(
-            "rooms/" + currentRoomCode
-          );
-
-        const snapshot =
-          await roomReference.once("value");
-
-        const room =
-          snapshot.val();
-
-        const uid =
-          room && room.buzzedBy;
-
-        if (!uid || !room.players[uid]) {
-          return;
-        }
-
-        await roomReference
-          .child("players")
-          .child(uid)
-          .child("wrong")
-          .transaction(
-            value => Number(value || 0) + 1
-          );
-
-        await roomReference
-          .child("buzzedBy")
-          .set(null);
-
-      } catch (error) {
-        showError(
-          "Could not mark wrong: " +
-          error.message
+      const roomReference =
+        database.ref(
+          "rooms/" + currentRoomCode
         );
+
+      const snapshot =
+        await roomReference.once("value");
+
+      const room =
+        snapshot.val();
+
+      const uid =
+        room && room.buzzedBy;
+
+      if (!uid || !room.players[uid]) {
+        return;
       }
+
+      await roomReference
+        .child("players")
+        .child(uid)
+        .child("wrong")
+        .transaction(
+          value =>
+            Number(value || 0) + 1
+        );
+
+      await roomReference
+        .child("buzzedBy")
+        .set(null);
     }
 
     async function nextQuestion() {
@@ -1560,50 +2015,70 @@
         return;
       }
 
-      try {
-        const roomReference =
-          database.ref(
-            "rooms/" + currentRoomCode
-          );
+      const roomReference =
+        database.ref(
+          "rooms/" + currentRoomCode
+        );
 
-        const snapshot =
-          await roomReference.once("value");
+      const snapshot =
+        await roomReference.once("value");
 
-        const room =
-          snapshot.val();
+      const room =
+        snapshot.val();
 
-        if (!room) {
-          return;
-        }
+      if (!room) {
+        return;
+      }
 
-        const nextIndex =
-          Number(room.currentQuestionIndex || 0) + 1;
+      const nextIndex =
+        Number(room.currentQuestionIndex) + 1;
 
-        const totalQuestions =
-          Array.isArray(room.questionIds)
-            ? room.questionIds.length
-            : 0;
-
-        if (nextIndex >= totalQuestions) {
-          await roomReference.update({
-            status: "finished",
-            buzzedBy: null
-          });
-
-          return;
-        }
-
+      if (
+        nextIndex >=
+        room.questionIds.length
+      ) {
         await roomReference.update({
-          currentQuestionIndex: nextIndex,
+          status: "finished",
           buzzedBy: null
         });
 
-      } catch (error) {
-        showError(
-          "Could not load next question: " +
-          error.message
-        );
+        return;
       }
+
+      await roomReference.update({
+        currentQuestionIndex: nextIndex,
+        buzzedBy: null
+      });
+    }
+
+    async function toggleStudentLimit(uid) {
+      if (
+        !currentRoomCode ||
+        currentRole !== "coach"
+      ) {
+        return;
+      }
+
+      const playerReference =
+        database
+          .ref("rooms/" + currentRoomCode)
+          .child("players")
+          .child(uid);
+
+      const snapshot =
+        await playerReference.once("value");
+
+      const player =
+        snapshot.val();
+
+      if (!player) {
+        return;
+      }
+
+      await playerReference.update({
+        limitOverride:
+          player.limitOverride !== true
+      });
     }
 
     async function leaveRoom(role) {
@@ -1765,11 +2240,124 @@
         () => showOnly(homeScreen)
       );
 
+    document
+      .getElementById("coachStartChapter")
+      .addEventListener(
+        "change",
+        () => {
+          populateVerseSelect(
+            document.getElementById(
+              "coachStartVerse"
+            ),
+            Number(
+              document.getElementById(
+                "coachStartChapter"
+              ).value
+            ),
+            1
+          );
+
+          updateCoachPreview();
+        }
+      );
+
+    document
+      .getElementById("coachEndChapter")
+      .addEventListener(
+        "change",
+        () => {
+          const chapter =
+            Number(
+              document.getElementById(
+                "coachEndChapter"
+              ).value
+            );
+
+          populateVerseSelect(
+            document.getElementById(
+              "coachEndVerse"
+            ),
+            chapter,
+            CHAPTER_VERSES[chapter]
+          );
+
+          updateCoachPreview();
+        }
+      );
+
+    document
+      .getElementById("coachStartVerse")
+      .addEventListener(
+        "change",
+        updateCoachPreview
+      );
+
+    document
+      .getElementById("coachEndVerse")
+      .addEventListener(
+        "change",
+        updateCoachPreview
+      );
+
+    document
+      .getElementById("coachQuestionCount")
+      .addEventListener(
+        "change",
+        updateCoachPreview
+      );
+
+    document
+      .getElementById("maxCorrectSelect")
+      .addEventListener(
+        "change",
+        updateCoachPreview
+      );
+
     auth.onAuthStateChanged(
       user => {
         currentUser = user;
       }
     );
+
+    renderCoachTypes();
+
+    populateChapterSelect(
+      document.getElementById(
+        "coachStartChapter"
+      )
+    );
+
+    populateChapterSelect(
+      document.getElementById(
+        "coachEndChapter"
+      )
+    );
+
+    document.getElementById(
+      "coachStartChapter"
+    ).value = "1";
+
+    document.getElementById(
+      "coachEndChapter"
+    ).value = "21";
+
+    populateVerseSelect(
+      document.getElementById(
+        "coachStartVerse"
+      ),
+      1,
+      1
+    );
+
+    populateVerseSelect(
+      document.getElementById(
+        "coachEndVerse"
+      ),
+      21,
+      25
+    );
+
+    updateCoachPreview();
   </script>
 </body>
 </html>
