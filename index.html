@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>BQ John Competition</title>
+
+  <style>
+    :root {
+      --blue: #2457a6;
+      --blue-dark: #173d78;
+      --light-blue: #eef4ff;
+      --green: #16834b;
+      --red: #b42318;
+      --gray: #667085;
+      --dark: #17202a;
+      --border: #d0d5dd;
+      --background: #f7f9fc;
+      --white: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--dark);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      color: var(--blue);
+      font-size: 32px;
+    }
+
+    h2 {
+      color: var(--blue-dark);
+    }
+
+    .subtitle {
+      color: var(--gray);
+      font-size: 14px;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 16px rgba(16, 24, 40, 0.08);
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    input,
+    button {
+      width: 100%;
+      min-height: 46px;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    input {
+      padding: 10px;
+      border: 1px solid var(--border);
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      padding: 10px 14px;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+
+    button:hover {
+      filter: brightness(0.96);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .primary {
+      background: var(--blue);
+      color: white;
+    }
+
+    .primary:hover {
+      background: var(--blue-dark);
+    }
+
+    .secondary {
+      background: var(--light-blue);
+      color: var(--blue);
+    }
+
+    .green {
+      background: var(--green);
+      color: white;
+    }
+
+    .gray-button {
+      background: #f2f4f7;
+      color: #344054;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .room-code {
+      padding: 18px;
+      margin: 16px 0;
+      border-radius: 12px;
+      background: var(--light-blue);
+      color: var(--blue);
+      font-size: 30px;
+      font-weight: bold;
+      letter-spacing: 5px;
+      text-align: center;
+    }
+
+    .status {
+      padding: 12px;
+      margin-top: 14px;
+      border-radius: 9px;
+      background: #f9fafb;
+      color: var(--gray);
+      line-height: 1.5;
+    }
+
+    .error {
+      padding: 12px;
+      margin-top: 14px;
+      border-radius: 9px;
+      background: #fff1f0;
+      color: var(--red);
+      line-height: 1.5;
+    }
+
+    .player-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .player-list li {
+      padding: 12px;
+      margin-top: 8px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: white;
+    }
+
+    .player-role {
+      float: right;
+      color: var(--gray);
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+
+    <header>
+      <h1>BQ John Competition</h1>
+      <div class="subtitle">
+        Multiplayer Bible Quizzing
+      </div>
+    </header>
+
+    <!-- HOME SCREEN -->
+    <section id="homeScreen" class="card">
+      <h2>Join or Create a Competition</h2>
+
+      <button id="coachButton" class="primary">
+        Create Room as Coach
+      </button>
+
+      <button id="studentButton" class="secondary">
+        Join Room as Student
+      </button>
+    </section>
+
+    <!-- COACH SCREEN -->
+    <section id="coachScreen" class="card hidden">
+      <h2>Coach Room</h2>
+
+      <button id="createRoomButton" class="primary">
+        Create New Room
+      </button>
+
+      <div id="coachRoomArea" class="hidden">
+        <div class="status">
+          Share this room code with the students.
+        </div>
+
+        <div id="coachRoomCode" class="room-code"></div>
+
+        <h3>Players</h3>
+
+        <ul id="coachPlayerList" class="player-list"></ul>
+
+        <button id="startCompetitionButton" class="green">
+          Start Competition
+        </button>
+      </div>
+
+      <button id="coachBackButton" class="gray-button">
+        Back
+      </button>
+    </section>
+
+    <!-- STUDENT SCREEN -->
+    <section id="studentScreen" class="card hidden">
+      <h2>Join Competition</h2>
+
+      <label for="studentName">
+        Your Name
+      </label>
+
+      <input
+        id="studentName"
+        type="text"
+        maxlength="30"
+        placeholder="Enter your name"
+      >
+
+      <label for="roomCodeInput">
+        Room Code
+      </label>
+
+      <input
+        id="roomCodeInput"
+        type="text"
+        maxlength="6"
+        placeholder="Enter room code"
+      >
+
+      <button id="joinRoomButton" class="primary">
+        Join Room
+      </button>
+
+      <div id="studentRoomArea" class="hidden">
+        <div class="status">
+          You have joined the room. Please wait for the coach.
+        </div>
+
+        <div id="studentRoomCode" class="room-code"></div>
+
+        <h3>Players</h3>
+
+        <ul id="studentPlayerList" class="player-list"></ul>
+      </div>
+
+      <button id="studentBackButton" class="gray-button">
+        Back
+      </button>
+    </section>
+
+    <!-- STATUS -->
+    <div id="errorMessage" class="error hidden"></div>
+
+  </main>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
+
+  <!-- Your Firebase configuration -->
+  <script src="firebase-config.js"></script>
+
+  <script>
+    const firebaseConfig =
+      window.FIREBASE_CONFIG;
+
+    firebase.initializeApp(firebaseConfig);
+
+    const auth =
+      firebase.auth();
+
+    const database =
+      firebase.database();
+
+    let currentUser = null;
+    let currentRoomCode = null;
+    let currentRoomListener = null;
+
+    const homeScreen =
+      document.getElementById("homeScreen");
+
+    const coachScreen =
+      document.getElementById("coachScreen");
+
+    const studentScreen =
+      document.getElementById("studentScreen");
+
+    const coachRoomArea =
+      document.getElementById("coachRoomArea");
+
+    const studentRoomArea =
+      document.getElementById("studentRoomArea");
+
+    const coachRoomCode =
+      document.getElementById("coachRoomCode");
+
+    const studentRoomCode =
+      document.getElementById("studentRoomCode");
+
+    const coachPlayerList =
+      document.getElementById("coachPlayerList");
+
+    const studentPlayerList =
+      document.getElementById("studentPlayerList");
+
+    const studentName =
+      document.getElementById("studentName");
+
+    const roomCodeInput =
+      document.getElementById("roomCodeInput");
+
+    const errorMessage =
+      document.getElementById("errorMessage");
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.remove("hidden");
+    }
+
+    function clearError() {
+      errorMessage.textContent = "";
+      errorMessage.classList.add("hidden");
+    }
+
+    function showOnly(screen) {
+      homeScreen.classList.add("hidden");
+      coachScreen.classList.add("hidden");
+      studentScreen.classList.add("hidden");
+
+      screen.classList.remove("hidden");
+    }
+
+    function makeRoomCode() {
+      const characters =
+        "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+      let code = "";
+
+      for (let i = 0; i < 6; i++) {
+        const index =
+          Math.floor(
+            Math.random() * characters.length
+          );
+
+        code += characters[index];
+      }
+
+      return code;
+    }
+
+    function renderPlayers(listElement, players) {
+      listElement.innerHTML = "";
+
+      if (!players) {
+        const emptyItem =
+          document.createElement("li");
+
+        emptyItem.textContent =
+          "No players have joined yet.";
+
+        listElement.appendChild(emptyItem);
+        return;
+      }
+
+      Object.values(players).forEach(player => {
+        const item =
+          document.createElement("li");
+
+        const role =
+          document.createElement("span");
+
+        role.className =
+          "player-role";
+
+        role.textContent =
+          player.role === "coach"
+            ? "Coach"
+            : "Student";
+
+        item.textContent =
+          player.name || "Unnamed player";
+
+        item.appendChild(role);
+        listElement.appendChild(item);
+      });
+    }
+
+    function listenToRoom(roomCode) {
+      currentRoomCode = roomCode;
+
+      if (currentRoomListener) {
+        currentRoomListener.off();
+      }
+
+      currentRoomListener =
+        database.ref("rooms/" + roomCode);
+
+      currentRoomListener.on(
+        "value",
+        snapshot => {
+          const room =
+            snapshot.val();
+
+          if (!room) {
+            showError("This room no longer exists.");
+            return;
+          }
+
+          renderPlayers(
+            coachPlayerList,
+            room.players
+          );
+
+          renderPlayers(
+            studentPlayerList,
+            room.players
+          );
+        }
+      );
+    }
+
+    async function signInAnonymously() {
+      if (currentUser) {
+        return currentUser;
+      }
+
+      const result =
+        await auth.signInAnonymously();
+
+      currentUser =
+        result.user;
+
+      return currentUser;
+    }
+
+    async function createRoom() {
+      clearError();
+
+      try {
+        const user =
+          await signInAnonymously();
+
+        let roomCode;
+        let roomExists = true;
+
+        while (roomExists) {
+          roomCode =
+            makeRoomCode();
+
+          const snapshot =
+            await database.ref(
+              "rooms/" + roomCode
+            ).once("value");
+
+          roomExists =
+            snapshot.exists();
+        }
+
+        const roomData = {
+          hostUid: user.uid,
+          status: "waiting",
+          currentQuestionIndex: -1,
+          createdAt: firebase.database.ServerValue.TIMESTAMP,
+          players: {}
+        };
+
+        roomData.players[user.uid] = {
+          name: "Coach",
+          role: "coach",
+          joinedAt: firebase.database.ServerValue.TIMESTAMP,
+          score: 0
+        };
+
+        await database.ref(
+          "rooms/" + roomCode
+        ).set(roomData);
+
+        coachRoomCode.textContent =
+          roomCode;
+
+        coachRoomArea.classList.remove("hidden");
+
+        listenToRoom(roomCode);
+
+      } catch (error) {
+        showError(
+          "Could not create room: " +
+          error.message
+        );
+      }
+    }
+
+    async function joinRoom() {
+      clearError();
+
+      const name =
+        studentName.value.trim();
+
+      const roomCode =
+        roomCodeInput.value
+          .trim()
+          .toUpperCase();
+
+      if (!name) {
+        showError("Please enter your name.");
+        return;
+      }
+
+      if (!/^[A-Z0-9]{6}$/.test(roomCode)) {
+        showError(
+          "Room code must contain 6 letters or numbers."
+        );
+
+        return;
+      }
+
+      try {
+        const user =
+          await signInAnonymously();
+
+        const roomReference =
+          database.ref(
+            "rooms/" + roomCode
+          );
+
+        const roomSnapshot =
+          await roomReference.once("value");
+
+        if (!roomSnapshot.exists()) {
+          showError("Room not found.");
+          return;
+        }
+
+        const room =
+          roomSnapshot.val();
+
+        if (room.status !== "waiting") {
+          showError(
+            "This competition has already started."
+          );
+
+          return;
+        }
+
+        await roomReference
+          .child("players")
+          .child(user.uid)
+          .set({
+            name: name,
+            role: "student",
+            joinedAt: firebase.database.ServerValue.TIMESTAMP,
+            score: 0
+          });
+
+        currentRoomCode =
+          roomCode;
+
+        studentRoomCode.textContent =
+          roomCode;
+
+        studentRoomArea.classList.remove("hidden");
+
+        listenToRoom(roomCode);
+
+      } catch (error) {
+        showError(
+          "Could not join room: " +
+          error.message
+        );
+      }
+    }
+
+    document
+      .getElementById("coachButton")
+      .addEventListener(
+        "click",
+        () => {
+          clearError();
+          showOnly(coachScreen);
+        }
+      );
+
+    document
+      .getElementById("studentButton")
+      .addEventListener(
+        "click",
+        () => {
+          clearError();
+          showOnly(studentScreen);
+        }
+      );
+
+    document
+      .getElementById("createRoomButton")
+      .addEventListener(
+        "click",
+        createRoom
+      );
+
+    document
+      .getElementById("joinRoomButton")
+      .addEventListener(
+        "click",
+        joinRoom
+      );
+
+    document
+      .getElementById("coachBackButton")
+      .addEventListener(
+        "click",
+        () => {
+          showOnly(homeScreen);
+        }
+      );
+
+    document
+      .getElementById("studentBackButton")
+      .addEventListener(
+        "click",
+        () => {
+          showOnly(homeScreen);
+        }
+      );
+
+    auth.onAuthStateChanged(
+      user => {
+        currentUser = user;
+      }
+    );
+  </script>
+</body>
+</html>
