@@ -1,9 +1,8 @@
 window.LiveKitMedia = {
   room: null,
+  roomName: null,
   localTracks: [],
   connected: false,
-  participantIdentity: null,
-  participantName: null,
 
   async connect(
     roomName,
@@ -18,8 +17,20 @@ window.LiveKitMedia = {
       throw new Error("LiveKit configuration is missing.");
     }
 
-    if (this.room && this.connected) {
+    /*
+      If currently connected to another room,
+      disconnect before joining the new room.
+    */
+    if (
+      this.connected &&
+      this.room &&
+      this.roomName === roomName
+    ) {
       return this.room;
+    }
+
+    if (this.room) {
+      this.disconnect();
     }
 
     let tokenSource;
@@ -46,16 +57,23 @@ window.LiveKitMedia = {
           );
     } else {
       throw new Error(
-        "No compatible LiveKit token server method was found."
+        "LiveKit development token server is unavailable."
       );
     }
 
+    /*
+      Force a fresh token request.
+      Each Coach and Student gets a unique identity.
+    */
     const tokenResult =
-      await tokenSource.fetch({
-        roomName: roomName,
-        participantIdentity: participantIdentity,
-        participantName: participantName
-      });
+      await tokenSource.fetch(
+        {
+          roomName: roomName,
+          participantIdentity: participantIdentity,
+          participantName: participantName
+        },
+        true
+      );
 
     this.room =
       new LivekitClient.Room({
@@ -80,7 +98,10 @@ window.LiveKitMedia = {
         try {
           track.detach();
         } catch (error) {
-          console.warn(error);
+          console.warn(
+            "Could not detach remote track:",
+            error
+          );
         }
       }
     );
@@ -88,14 +109,9 @@ window.LiveKitMedia = {
     this.room.on(
       LivekitClient.RoomEvent.ParticipantDisconnected,
       participant => {
-        const element =
-          document.getElementById(
-            "livekit-" + participant.identity
-          );
-
-        if (element) {
-          element.remove();
-        }
+        this.removeParticipant(
+          participant.identity
+        );
       }
     );
 
@@ -105,16 +121,32 @@ window.LiveKitMedia = {
     );
 
     this.connected = true;
-    this.participantIdentity =
-      participantIdentity;
-    this.participantName =
-      participantName;
+    this.roomName = roomName;
 
     console.log(
       "Connected to LiveKit room:",
       roomName,
-      "as:",
-      participantIdentity
+      "Identity:",
+      this.room.localParticipant.identity
+    );
+
+    /*
+      Attach tracks from participants already
+      in the room when we connected.
+    */
+    this.room.remoteParticipants.forEach(
+      participant => {
+        participant.trackPublications.forEach(
+          publication => {
+            if (publication.track) {
+              this.attachRemoteTrack(
+                publication.track,
+                participant
+              );
+            }
+          }
+        );
+      }
     );
 
     return this.room;
@@ -125,7 +157,11 @@ window.LiveKitMedia = {
     participantIdentity,
     participantName
   ) {
-    if (!this.connected || !this.room) {
+    if (
+      !this.connected ||
+      !this.room ||
+      this.roomName !== roomName
+    ) {
       await this.connect(
         roomName,
         participantIdentity,
@@ -178,7 +214,7 @@ window.LiveKitMedia = {
 
     let box =
       document.getElementById(
-        "livekit-" + identity
+        "livekit-participant-" + identity
       );
 
     if (!box) {
@@ -186,7 +222,7 @@ window.LiveKitMedia = {
         document.createElement("div");
 
       box.id =
-        "livekit-" + identity;
+        "livekit-participant-" + identity;
 
       box.className =
         "livekit-participant";
@@ -221,6 +257,12 @@ window.LiveKitMedia = {
     const element =
       track.attach();
 
+    element.dataset.livekitIdentity =
+      participant.identity;
+
+    element.dataset.livekitKind =
+      track.kind;
+
     if (track.kind === "video") {
       element.className =
         "livekit-video";
@@ -241,7 +283,7 @@ window.LiveKitMedia = {
 
     element.play().catch(() => {
       console.log(
-        "Browser requires media click before playback."
+        "Browser may require a user click to play remote media."
       );
     });
   },
@@ -249,7 +291,7 @@ window.LiveKitMedia = {
   attachLocalPreview(track) {
     const box =
       this.getParticipantBox(
-        "local",
+        "local-preview",
         "You"
       );
 
@@ -259,6 +301,12 @@ window.LiveKitMedia = {
 
     const element =
       track.attach();
+
+    element.dataset.livekitIdentity =
+      "local-preview";
+
+    element.dataset.livekitKind =
+      track.kind;
 
     if (track.kind === "video") {
       element.className =
@@ -275,9 +323,49 @@ window.LiveKitMedia = {
 
       element.autoplay = true;
       element.muted = true;
+      element.controls = false;
     }
 
     box.appendChild(element);
+  },
+
+  removeParticipant(identity) {
+    const box =
+      document.getElementById(
+        "livekit-participant-" + identity
+      );
+
+    if (box) {
+      box.remove();
+    }
+  },
+
+  removeLocalPreview(kind) {
+    const elements =
+      document.querySelectorAll(
+        '[data-livekit-identity="local-preview"]'
+      );
+
+    elements.forEach(element => {
+      if (
+        !kind ||
+        element.dataset.livekitKind === kind
+      ) {
+        element.remove();
+      }
+    });
+
+    const localBox =
+      document.getElementById(
+        "livekit-participant-local-preview"
+      );
+
+    if (
+      localBox &&
+      localBox.querySelectorAll("video, audio").length === 0
+    ) {
+      localBox.remove();
+    }
   },
 
   hasAudioTrack() {
@@ -335,17 +423,26 @@ window.LiveKitMedia = {
         this.room.localParticipant
           .unpublishTrack(track);
       } catch (error) {
-        console.warn(error);
+        console.warn(
+          "Could not unpublish microphone:",
+          error
+        );
       }
 
-      track.detach();
-      track.stop();
+      try {
+        track.detach();
+        track.stop();
+      } catch (error) {
+        console.warn(error);
+      }
     });
 
     this.localTracks =
       this.localTracks.filter(
         track => track.kind !== "audio"
       );
+
+    this.removeLocalPreview("audio");
 
     console.log("Microphone turned off.");
   },
@@ -393,17 +490,26 @@ window.LiveKitMedia = {
         this.room.localParticipant
           .unpublishTrack(track);
       } catch (error) {
-        console.warn(error);
+        console.warn(
+          "Could not unpublish camera:",
+          error
+        );
       }
 
-      track.detach();
-      track.stop();
+      try {
+        track.detach();
+        track.stop();
+      } catch (error) {
+        console.warn(error);
+      }
     });
 
     this.localTracks =
       this.localTracks.filter(
         track => track.kind !== "video"
       );
+
+    this.removeLocalPreview("video");
 
     console.log("Camera turned off.");
   },
@@ -417,9 +523,14 @@ window.LiveKitMedia = {
     }
 
     this.room = null;
+    this.roomName = null;
     this.connected = false;
-    this.participantIdentity = null;
-    this.participantName = null;
+
+    document
+      .querySelectorAll(".livekit-participant")
+      .forEach(element => {
+        element.remove();
+      });
 
     console.log("Disconnected from LiveKit.");
   }
