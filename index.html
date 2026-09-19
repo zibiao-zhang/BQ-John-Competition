@@ -574,25 +574,15 @@
         Next Question
       </button>
 
-      <div class="button-row">
-        <button id="coachMicOnButton" class="secondary">
-          Turn Microphone On
-        </button>
+     <div class="button-row">
+  <button id="coachMicButton" class="secondary">
+    Turn Microphone On
+  </button>
 
-        <button id="coachMicOffButton" class="gray-button">
-          Turn Microphone Off
-        </button>
-      </div>
-
-      <div class="button-row">
-        <button id="coachCameraOnButton" class="secondary">
-          Turn Camera On
-        </button>
-
-        <button id="coachCameraOffButton" class="gray-button">
-          Turn Camera Off
-        </button>
-      </div>
+  <button id="coachCameraButton" class="secondary">
+    Turn Camera On
+  </button>
+</div>
 
       <div id="coachMediaStatus" class="media-status">
         Microphone: Off | Camera: Off
@@ -641,25 +631,15 @@
         Buzz In
       </button>
 
-      <div class="button-row">
-        <button id="studentMicOnButton" class="secondary">
-          Turn Microphone On
-        </button>
+    <div class="button-row">
+  <button id="studentMicButton" class="secondary">
+    Turn Microphone On
+  </button>
 
-        <button id="studentMicOffButton" class="gray-button">
-          Turn Microphone Off
-        </button>
-      </div>
-
-      <div class="button-row">
-        <button id="studentCameraOnButton" class="secondary">
-          Turn Camera On
-        </button>
-
-        <button id="studentCameraOffButton" class="gray-button">
-          Turn Camera Off
-        </button>
-      </div>
+  <button id="studentCameraButton" class="secondary">
+    Turn Camera On
+  </button>
+</div>
 
       <div id="studentMediaStatus" class="media-status">
         Microphone: Off | Camera: Off
@@ -1240,15 +1220,67 @@
     }
 
     function updateMediaStatus() {
-      const text =
-        "Microphone: " +
-        (microphoneOn ? "On" : "Off") +
-        " | Camera: " +
-        (cameraOn ? "On" : "Off");
+  const text =
+    "Microphone: " +
+    (microphoneOn ? "On" : "Off") +
+    " | Camera: " +
+    (cameraOn ? "On" : "Off");
 
-      $("coachMediaStatus").textContent = text;
-      $("studentMediaStatus").textContent = text;
-    }
+  coachMediaStatus.textContent = text;
+  studentMediaStatus.textContent = text;
+
+  const micText =
+    microphoneOn
+      ? "Turn Microphone Off"
+      : "Turn Microphone On";
+
+  const cameraText =
+    cameraOn
+      ? "Turn Camera Off"
+      : "Turn Camera On";
+
+  const micClass =
+    microphoneOn
+      ? "gray-button"
+      : "secondary";
+
+  const cameraClass =
+    cameraOn
+      ? "gray-button"
+      : "secondary";
+
+  const coachMicButton =
+    document.getElementById("coachMicButton");
+
+  const studentMicButton =
+    document.getElementById("studentMicButton");
+
+  const coachCameraButton =
+    document.getElementById("coachCameraButton");
+
+  const studentCameraButton =
+    document.getElementById("studentCameraButton");
+
+  if (coachMicButton) {
+    coachMicButton.textContent = micText;
+    coachMicButton.className = micClass;
+  }
+
+  if (studentMicButton) {
+    studentMicButton.textContent = micText;
+    studentMicButton.className = micClass;
+  }
+
+  if (coachCameraButton) {
+    coachCameraButton.textContent = cameraText;
+    coachCameraButton.className = cameraClass;
+  }
+
+  if (studentCameraButton) {
+    studentCameraButton.textContent = cameraText;
+    studentCameraButton.className = cameraClass;
+  }
+}
 
     async function connectCompetitionMedia() {
       if (
@@ -1773,7 +1805,13 @@
         );
       }
     }
-
+async function toggleMicrophone() {
+  if (microphoneOn) {
+    turnMicrophoneOff();
+  } else {
+    await turnMicrophoneOn();
+  }
+}
     async function turnCameraOn() {
       try {
         if (
@@ -1819,7 +1857,13 @@
         );
       }
     }
-
+async function toggleCamera() {
+  if (cameraOn) {
+    turnCameraOff();
+  } else {
+    await turnCameraOn();
+  }
+}
     async function leaveRoom(role) {
       clearError();
 
@@ -1899,15 +1943,33 @@
     $("coachWrongButton").addEventListener("click", markWrong);
     $("coachNextButton").addEventListener("click", nextQuestion);
 
-    $("coachMicOnButton").addEventListener("click", turnMicrophoneOn);
-    $("coachMicOffButton").addEventListener("click", turnMicrophoneOff);
-    $("coachCameraOnButton").addEventListener("click", turnCameraOn);
-    $("coachCameraOffButton").addEventListener("click", turnCameraOff);
+    document
+  .getElementById("coachMicButton")
+  .addEventListener(
+    "click",
+    toggleMicrophone
+  );
 
-    $("studentMicOnButton").addEventListener("click", turnMicrophoneOn);
-    $("studentMicOffButton").addEventListener("click", turnMicrophoneOff);
-    $("studentCameraOnButton").addEventListener("click", turnCameraOn);
-    $("studentCameraOffButton").addEventListener("click", turnCameraOff);
+document
+  .getElementById("coachCameraButton")
+  .addEventListener(
+    "click",
+    toggleCamera
+  );
+
+document
+  .getElementById("studentMicButton")
+  .addEventListener(
+    "click",
+    toggleMicrophone
+  );
+
+document
+  .getElementById("studentCameraButton")
+  .addEventListener(
+    "click",
+    toggleCamera
+  );
 
     $("leaveCoachButton").addEventListener("click", () => {
       leaveRoom("coach");
