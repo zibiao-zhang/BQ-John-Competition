@@ -16,11 +16,24 @@ window.LiveKitMedia = {
       return this.room;
     }
 
-    const tokenSource =
-      LivekitClient.TokenSource
-        .developmentTokenServer(
-          window.LIVEKIT_CONFIG.tokenServerId
-        );
+    let tokenSource;
+
+if (
+  typeof LivekitClient.TokenSource
+    .developmentTokenServer === "function"
+) {
+  tokenSource =
+    LivekitClient.TokenSource
+      .developmentTokenServer(
+        window.LIVEKIT_CONFIG.tokenServerId
+      );
+} else {
+  tokenSource =
+    LivekitClient.TokenSource
+      .sandboxTokenServer(
+        window.LIVEKIT_CONFIG.tokenServerId
+      );
+}
 
     const tokenResult =
       await tokenSource.fetch({
