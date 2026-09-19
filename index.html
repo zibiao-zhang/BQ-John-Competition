@@ -604,7 +604,49 @@
         );
       }
     }
+async function startCompetition() {
+  clearError();
 
+  if (!currentRoomCode) {
+    showError("Please create a room first.");
+    return;
+  }
+
+  try {
+    await database
+      .ref("rooms/" + currentRoomCode)
+      .update({
+        status: "started",
+        startedAt: firebase.database.ServerValue.TIMESTAMP
+      });
+
+    const button =
+      document.getElementById(
+        "startCompetitionButton"
+      );
+
+    button.textContent =
+      "Competition Started";
+
+    button.disabled = true;
+
+    const status =
+      document.querySelector(
+        "#coachRoomArea .status"
+      );
+
+    if (status) {
+      status.textContent =
+        "Competition has started.";
+    }
+
+  } catch (error) {
+    showError(
+      "Could not start competition: " +
+      error.message
+    );
+  }
+}
     document
       .getElementById("coachButton")
       .addEventListener(
