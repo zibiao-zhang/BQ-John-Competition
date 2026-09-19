@@ -1662,30 +1662,40 @@
         currentRole !== "coach" ||
         room.status !== "started";
     }
+  async function connectCompetitionMedia() {
+  if (
+    !currentRoomCode ||
+    !currentUser ||
+    !window.LiveKitMedia
+  ) {
+    return;
+  }
 
-    async function connectCompetitionMedia() {
-      if (
-        !currentRoomCode ||
-        !window.LiveKitMedia
-      ) {
-        return;
-      }
+  try {
+    const player =
+      currentRoomData &&
+      currentRoomData.players &&
+      currentRoomData.players[currentUser.uid];
 
-      if (LiveKitMedia.connected) {
-        return;
-      }
+    const playerName =
+      player && player.name
+        ? player.name
+        : currentRole;
 
-      try {
-        await LiveKitMedia.connect(
-          "bq-" + currentRoomCode
-        );
-      } catch (error) {
-        console.warn(
-          "LiveKit connection failed:",
-          error
-        );
-      }
-    }
+    await LiveKitMedia.connect(
+      "bq-" + currentRoomCode,
+      currentUser.uid,
+      playerName
+    );
+
+  } catch (error) {
+    console.warn(
+      "LiveKit connection failed:",
+      error
+    );
+  }
+}
+   
 
     function updateMediaStatus() {
       const text =
@@ -1708,9 +1718,14 @@
           return;
         }
 
-        await LiveKitMedia.turnMicrophoneOn(
-          "bq-" + currentRoomCode
-        );
+       const player =
+  currentRoomData.players[currentUser.uid];
+
+await LiveKitMedia.turnMicrophoneOn(
+  "bq-" + currentRoomCode,
+  currentUser.uid,
+  player ? player.name : currentRole
+);
 
         microphoneOn = true;
         updateMediaStatus();
@@ -1744,10 +1759,15 @@
           showError("You are not in a room.");
           return;
         }
+    const player =
+  currentRoomData.players[currentUser.uid];
 
-        await LiveKitMedia.turnCameraOn(
-          "bq-" + currentRoomCode
-        );
+await LiveKitMedia.turnCameraOn(
+  "bq-" + currentRoomCode,
+  currentUser.uid,
+  player ? player.name : currentRole
+);
+        
 
         cameraOn = true;
         updateMediaStatus();
