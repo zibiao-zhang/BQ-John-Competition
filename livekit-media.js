@@ -2,6 +2,8 @@ window.LiveKitMedia = {
   room: null,
   localTracks: [],
   connected: false,
+  mediaContainer: null,
+  participantElements: {},
 
   async connect(roomName) {
     if (!window.LivekitClient) {
@@ -56,12 +58,40 @@ window.LiveKitMedia = {
         autoSubscribe: true
       });
 
+    this.room.on(
+      LivekitClient.RoomEvent.TrackSubscribed,
+      (track, publication, participant) => {
+        this.attachRemoteTrack(
+          track,
+          participant
+        );
+      }
+    );
+
+    this.room.on(
+      LivekitClient.RoomEvent.TrackUnsubscribed,
+      (track, publication, participant) => {
+        this.detachTrack(track);
+      }
+    );
+
+    this.room.on(
+      LivekitClient.RoomEvent.ParticipantDisconnected,
+      participant => {
+        this.removeParticipantMedia(
+          participant.identity
+        );
+      }
+    );
+
     await this.room.connect(
       tokenResult.serverUrl,
       tokenResult.participantToken
     );
 
     this.connected = true;
+
+    this.createMediaContainer();
 
     console.log(
       "Connected to LiveKit room:",
@@ -77,6 +107,283 @@ window.LiveKitMedia = {
     }
 
     return this.room;
+  },
+
+  createMediaContainer() {
+    if (this.mediaContainer) {
+      return this.mediaContainer;
+    }
+
+    this.mediaContainer =
+      document.createElement("div");
+
+    this.mediaContainer.id =
+      "livekitMediaContainer";
+
+    this.mediaContainer.style.display =
+      "grid";
+
+    this.mediaContainer.style.gridTemplateColumns =
+      "repeat(auto-fit, minmax(220px, 1fr))";
+
+    this.mediaContainer.style.gap =
+      "12px";
+
+    this.mediaContainer.style.marginTop =
+      "16px";
+
+    const coachBox =
+      document.getElementById(
+        "coachCompetitionScreen"
+      );
+
+    const studentBox =
+      document.getElementById(
+        "studentCompetitionScreen"
+      );
+
+    if (coachBox) {
+      coachBox.appendChild(
+        this.mediaContainer.cloneNode(false)
+      );
+    }
+
+    if (studentBox) {
+      studentBox.appendChild(
+        this.mediaContainer.cloneNode(false)
+      );
+    }
+
+    return this.mediaContainer;
+  },
+
+  getVisibleMediaContainer() {
+    const coachScreen =
+      document.getElementById(
+        "coachCompetitionScreen"
+      );
+
+    const studentScreen =
+      document.getElementById(
+        "studentCompetitionScreen"
+      );
+
+    if (
+      coachScreen &&
+      !coachScreen.classList.contains("hidden")
+    ) {
+      let container =
+        document.getElementById(
+          "coachLivekitMediaContainer"
+        );
+
+      if (!container) {
+        container =
+          document.createElement("div");
+
+        container.id =
+          "coachLivekitMediaContainer";
+
+        container.className =
+          "livekit-media-container";
+
+        coachScreen.appendChild(container);
+      }
+
+      return container;
+    }
+
+    if (
+      studentScreen &&
+      !studentScreen.classList.contains("hidden")
+    ) {
+      let container =
+        document.getElementById(
+          "studentLivekitMediaContainer"
+        );
+
+      if (!container) {
+        container =
+          document.createElement("div");
+
+        container.id =
+          "studentLivekitMediaContainer";
+
+        container.className =
+          "livekit-media-container";
+
+        studentScreen.appendChild(container);
+      }
+
+      return container;
+    }
+
+    return null;
+  },
+
+  attachRemoteTrack(track, participant) {
+    const container =
+      this.getVisibleMediaContainer();
+
+    if (!container) {
+      return;
+    }
+
+    const identity =
+      participant.identity;
+
+    let participantBox =
+      document.getElementById(
+        "participant-" + identity
+      );
+
+    if (!participantBox) {
+      participantBox =
+        document.createElement("div");
+
+      participantBox.id =
+        "participant-" + identity;
+
+      participantBox.className =
+        "livekit-participant";
+
+      const name =
+        document.createElement("div");
+
+      name.className =
+        "livekit-participant-name";
+
+      name.textContent =
+        participant.name ||
+        identity;
+
+      participantBox.appendChild(name);
+      container.appendChild(participantBox);
+
+      this.participantElements[identity] =
+        participantBox;
+    }
+
+    const element =
+      track.attach();
+
+    element.dataset.identity =
+      identity;
+
+    if (track.kind === "video") {
+      element.className =
+        "livekit-video";
+
+      element.autoplay = true;
+      element.playsInline = true;
+    }
+
+    if (track.kind === "audio") {
+      element.className =
+        "livekit-audio";
+
+      element.autoplay = true;
+      element.controls = false;
+    }
+
+    participantBox.appendChild(element);
+
+    try {
+      element.play();
+    } catch (error) {
+      console.warn(
+        "Autoplay requires user interaction.",
+        error
+      );
+    }
+  },
+
+  attachLocalPreview(track) {
+    const container =
+      this.getVisibleMediaContainer();
+
+    if (!container) {
+      return;
+    }
+
+    let participantBox =
+      document.getElementById(
+        "participant-local"
+      );
+
+    if (!participantBox) {
+      participantBox =
+        document.createElement("div");
+
+      participantBox.id =
+        "participant-local";
+
+      participantBox.className =
+        "livekit-participant";
+
+      const name =
+        document.createElement("div");
+
+      name.className =
+        "livekit-participant-name";
+
+      name.textContent =
+        "You";
+
+      participantBox.appendChild(name);
+      container.appendChild(participantBox);
+    }
+
+    const element =
+      track.attach();
+
+    element.dataset.identity =
+      "local";
+
+    if (track.kind === "video") {
+      element.className =
+        "livekit-video";
+
+      element.autoplay = true;
+      element.muted = true;
+      element.playsInline = true;
+    }
+
+    if (track.kind === "audio") {
+      element.className =
+        "livekit-audio";
+
+      element.autoplay = true;
+      element.muted = true;
+    }
+
+    participantBox.appendChild(element);
+  },
+
+  detachTrack(track) {
+    try {
+      track.detach();
+    } catch (error) {
+      console.warn(
+        "Could not detach track.",
+        error
+      );
+    }
+  },
+
+  removeParticipantMedia(identity) {
+    const element =
+      document.getElementById(
+        "participant-" + identity
+      );
+
+    if (element) {
+      element.remove();
+    }
+
+    delete this.participantElements[
+      identity
+    ];
   },
 
   hasAudioTrack() {
@@ -95,7 +402,6 @@ window.LiveKitMedia = {
     await this.ensureConnected(roomName);
 
     if (this.hasAudioTrack()) {
-      console.log("Microphone is already on.");
       return;
     }
 
@@ -110,40 +416,36 @@ window.LiveKitMedia = {
         .publishTrack(track);
 
       this.localTracks.push(track);
+      this.attachLocalPreview(track);
     }
 
     console.log("Microphone turned on.");
   },
 
   turnMicrophoneOff() {
-    if (!this.room) {
-      return;
-    }
-
-    const audioTracks =
+    const tracks =
       this.localTracks.filter(
         track => track.kind === "audio"
       );
 
-    audioTracks.forEach(track => {
+    tracks.forEach(track => {
       try {
         this.room.localParticipant
           .unpublishTrack(track);
       } catch (error) {
-        console.warn(
-          "Could not unpublish microphone:",
-          error
-        );
+        console.warn(error);
       }
 
+      this.detachTrack(track);
       track.stop();
-      track.detach();
     });
 
     this.localTracks =
       this.localTracks.filter(
         track => track.kind !== "audio"
       );
+
+    this.removeLocalAudioElements();
 
     console.log("Microphone turned off.");
   },
@@ -152,7 +454,6 @@ window.LiveKitMedia = {
     await this.ensureConnected(roomName);
 
     if (this.hasVideoTrack()) {
-      console.log("Camera is already on.");
       return;
     }
 
@@ -167,34 +468,28 @@ window.LiveKitMedia = {
         .publishTrack(track);
 
       this.localTracks.push(track);
+      this.attachLocalPreview(track);
     }
 
     console.log("Camera turned on.");
   },
 
   turnCameraOff() {
-    if (!this.room) {
-      return;
-    }
-
-    const videoTracks =
+    const tracks =
       this.localTracks.filter(
         track => track.kind === "video"
       );
 
-    videoTracks.forEach(track => {
+    tracks.forEach(track => {
       try {
         this.room.localParticipant
           .unpublishTrack(track);
       } catch (error) {
-        console.warn(
-          "Could not unpublish camera:",
-          error
-        );
+        console.warn(error);
       }
 
+      this.detachTrack(track);
       track.stop();
-      track.detach();
     });
 
     this.localTracks =
@@ -202,16 +497,40 @@ window.LiveKitMedia = {
         track => track.kind !== "video"
       );
 
+    this.removeLocalVideoElements();
+
     console.log("Camera turned off.");
   },
 
-  turnAllMediaOff() {
-    this.turnMicrophoneOff();
-    this.turnCameraOff();
+  removeLocalAudioElements() {
+    const elements =
+      document.querySelectorAll(
+        '[data-identity="local"]'
+      );
+
+    elements.forEach(element => {
+      if (element.tagName === "AUDIO") {
+        element.remove();
+      }
+    });
+  },
+
+  removeLocalVideoElements() {
+    const elements =
+      document.querySelectorAll(
+        '[data-identity="local"]'
+      );
+
+    elements.forEach(element => {
+      if (element.tagName === "VIDEO") {
+        element.remove();
+      }
+    });
   },
 
   disconnect() {
-    this.turnAllMediaOff();
+    this.turnMicrophoneOff();
+    this.turnCameraOff();
 
     if (this.room) {
       this.room.disconnect();
@@ -219,6 +538,14 @@ window.LiveKitMedia = {
 
     this.room = null;
     this.connected = false;
+
+    this.removeParticipantMedia("local");
+
+    document
+      .querySelectorAll(".livekit-participant")
+      .forEach(element => {
+        element.remove();
+      });
 
     console.log("Disconnected from LiveKit.");
   }
