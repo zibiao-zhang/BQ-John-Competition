@@ -18,22 +18,31 @@ window.LiveKitMedia = {
 
     let tokenSource;
 
-if (
-  typeof LivekitClient.TokenSource
-    .developmentTokenServer === "function"
-) {
-  tokenSource =
-    LivekitClient.TokenSource
-      .developmentTokenServer(
-        window.LIVEKIT_CONFIG.tokenServerId
+    if (
+      LivekitClient.TokenSource &&
+      typeof LivekitClient.TokenSource
+        .developmentTokenServer === "function"
+    ) {
+      tokenSource =
+        LivekitClient.TokenSource
+          .developmentTokenServer(
+            window.LIVEKIT_CONFIG.tokenServerId
+          );
+    } else if (
+      LivekitClient.TokenSource &&
+      typeof LivekitClient.TokenSource
+        .sandboxTokenServer === "function"
+    ) {
+      tokenSource =
+        LivekitClient.TokenSource
+          .sandboxTokenServer(
+            window.LIVEKIT_CONFIG.tokenServerId
+          );
+    } else {
+      throw new Error(
+        "No compatible LiveKit token server method was found."
       );
-} else {
-  tokenSource =
-    LivekitClient.TokenSource
-      .sandboxTokenServer(
-        window.LIVEKIT_CONFIG.tokenServerId
-      );
-}
+    }
 
     const tokenResult =
       await tokenSource.fetch({
@@ -43,7 +52,8 @@ if (
     this.room =
       new LivekitClient.Room({
         adaptiveStream: true,
-        dynacast: true
+        dynacast: true,
+        autoSubscribe: true
       });
 
     await this.room.connect(
@@ -61,42 +71,73 @@ if (
     return this.room;
   },
 
- async enableAnswerMedia() {
-  if (!this.room) {
-    throw new Error("LiveKit room is not connected.");
-  }
+  async ensureConnected(roomName) {
+    if (!this.connected || !this.room) {
+      await this.connect(roomName);
+    }
 
-  const tracks =
-    await LivekitClient.createLocalTracks({
-      audio: true,
-      video: true
-    });
+    return this.room;
+  },
 
-  for (const track of tracks) {
-    await this.room.localParticipant.publishTrack(track);
-    this.localTracks.push(track);
-  }
+  hasAudioTrack() {
+    return this.localTracks.some(
+      track => track.kind === "audio"
+    );
+  },
 
-  console.log("Answer microphone and camera enabled.");
-},
+  hasVideoTrack() {
+    return this.localTracks.some(
+      track => track.kind === "video"
+    );
+  },
 
-disableAnswerMedia() {
-  this.localTracks.forEach(track => {
-    track.stop();
-    track.detach();
-  });
+  async turnMicrophoneOn(roomName) {
+    await this.ensureConnected(roomName);
 
-  this.localTracks = [];
+    if (this.hasAudioTrack()) {
+      console.log("Microphone is already on.");
+      return;
+    }
 
-  console.log("Answer microphone and camera disabled.");
-},
+    const tracks =
+      await LivekitClient.createLocalTracks({
+        audio: true,
+        video: false
+      });
 
-  disableMicrophone() {
-    this.localTracks.forEach(track => {
-      if (track.kind === "audio") {
-        track.stop();
-        track.detach();
+    for (const track of tracks) {
+      await this.room.localParticipant
+        .publishTrack(track);
+
+      this.localTracks.push(track);
+    }
+
+    console.log("Microphone turned on.");
+  },
+
+  turnMicrophoneOff() {
+    if (!this.room) {
+      return;
+    }
+
+    const audioTracks =
+      this.localTracks.filter(
+        track => track.kind === "audio"
+      );
+
+    audioTracks.forEach(track => {
+      try {
+        this.room.localParticipant
+          .unpublishTrack(track);
+      } catch (error) {
+        console.warn(
+          "Could not unpublish microphone:",
+          error
+        );
       }
+
+      track.stop();
+      track.detach();
     });
 
     this.localTracks =
@@ -104,15 +145,56 @@ disableAnswerMedia() {
         track => track.kind !== "audio"
       );
 
-    console.log("Microphone disabled.");
+    console.log("Microphone turned off.");
   },
 
-  disableCamera() {
-    this.localTracks.forEach(track => {
-      if (track.kind === "video") {
-        track.stop();
-        track.detach();
+  async turnCameraOn(roomName) {
+    await this.ensureConnected(roomName);
+
+    if (this.hasVideoTrack()) {
+      console.log("Camera is already on.");
+      return;
+    }
+
+    const tracks =
+      await LivekitClient.createLocalTracks({
+        audio: false,
+        video: true
+      });
+
+    for (const track of tracks) {
+      await this.room.localParticipant
+        .publishTrack(track);
+
+      this.localTracks.push(track);
+    }
+
+    console.log("Camera turned on.");
+  },
+
+  turnCameraOff() {
+    if (!this.room) {
+      return;
+    }
+
+    const videoTracks =
+      this.localTracks.filter(
+        track => track.kind === "video"
+      );
+
+    videoTracks.forEach(track => {
+      try {
+        this.room.localParticipant
+          .unpublishTrack(track);
+      } catch (error) {
+        console.warn(
+          "Could not unpublish camera:",
+          error
+        );
       }
+
+      track.stop();
+      track.detach();
     });
 
     this.localTracks =
@@ -120,16 +202,16 @@ disableAnswerMedia() {
         track => track.kind !== "video"
       );
 
-    console.log("Camera disabled.");
+    console.log("Camera turned off.");
+  },
+
+  turnAllMediaOff() {
+    this.turnMicrophoneOff();
+    this.turnCameraOff();
   },
 
   disconnect() {
-    this.localTracks.forEach(track => {
-      track.stop();
-      track.detach();
-    });
-
-    this.localTracks = [];
+    this.turnAllMediaOff();
 
     if (this.room) {
       this.room.disconnect();
