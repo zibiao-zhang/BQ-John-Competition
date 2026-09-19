@@ -35,7 +35,7 @@
 
     .app {
       width: 100%;
-      max-width: 900px;
+      max-width: 920px;
       margin: 0 auto;
       padding: 20px;
     }
@@ -62,7 +62,7 @@
     }
 
     .card {
-      background: var(--white);
+      background: white;
       border-radius: 16px;
       padding: 22px;
       margin-bottom: 18px;
@@ -196,13 +196,18 @@
       text-align: center;
     }
 
-    .status {
+    .status,
+    .media-status {
       padding: 12px;
       margin-top: 12px;
       border-radius: 9px;
       background: #f9fafb;
       color: var(--gray);
       line-height: 1.5;
+    }
+
+    .media-status {
+      text-align: center;
     }
 
     .error {
@@ -300,6 +305,12 @@
       text-align: center;
     }
 
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
     .scoreboard {
       overflow-x: auto;
     }
@@ -327,10 +338,39 @@
       font-size: 15px;
     }
 
-    .button-row {
+    .livekit-media-container {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .livekit-participant {
+      overflow: hidden;
+      min-height: 80px;
+      border-radius: 12px;
+      background: #17202a;
+      color: white;
+    }
+
+    .livekit-participant-name {
+      padding: 8px;
+      background: #2457a6;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .livekit-video {
+      display: block;
+      width: 100%;
+      max-height: 280px;
+      object-fit: cover;
+      background: black;
+    }
+
+    .livekit-audio {
+      width: 100%;
+      margin: 10px 0;
     }
 
     @media (max-width: 680px) {
@@ -446,9 +486,7 @@
       </button>
 
       <div id="coachRoomArea" class="hidden">
-        <div id="coachStatus" class="status">
-          Share this room code with the students.
-        </div>
+        <div id="coachStatus" class="status"></div>
 
         <div id="coachRoomCode" class="room-code"></div>
 
@@ -547,6 +585,33 @@
         Next Question
       </button>
 
+      <div class="button-row">
+        <button id="coachMicOnButton" class="secondary">
+          Turn Microphone On
+        </button>
+
+        <button id="coachMicOffButton" class="gray-button">
+          Turn Microphone Off
+        </button>
+      </div>
+
+      <div class="button-row">
+        <button id="coachCameraOnButton" class="secondary">
+          Turn Camera On
+        </button>
+
+        <button id="coachCameraOffButton" class="gray-button">
+          Turn Camera Off
+        </button>
+      </div>
+
+      <div id="coachMediaStatus" class="media-status">
+        Microphone: Off | Camera: Off
+      </div>
+
+      <div id="coachLivekitMediaContainer"
+           class="livekit-media-container"></div>
+
       <button id="coachLeaveCompetitionButton" class="gray-button">
         Leave Room
       </button>
@@ -587,6 +652,33 @@
         Buzz In
       </button>
 
+      <div class="button-row">
+        <button id="studentMicOnButton" class="secondary">
+          Turn Microphone On
+        </button>
+
+        <button id="studentMicOffButton" class="gray-button">
+          Turn Microphone Off
+        </button>
+      </div>
+
+      <div class="button-row">
+        <button id="studentCameraOnButton" class="secondary">
+          Turn Camera On
+        </button>
+
+        <button id="studentCameraOffButton" class="gray-button">
+          Turn Camera Off
+        </button>
+      </div>
+
+      <div id="studentMediaStatus" class="media-status">
+        Microphone: Off | Camera: Off
+      </div>
+
+      <div id="studentLivekitMediaContainer"
+           class="livekit-media-container"></div>
+
       <button id="studentLeaveCompetitionButton" class="red">
         Leave Room
       </button>
@@ -609,18 +701,18 @@
     </section>
 
     <div id="errorMessage" class="error hidden"></div>
-
   </main>
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
 
-<script src="firebase-config.js"></script>
-<script src="livekit-config.js"></script>
-<script src="livekit-media.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/livekit-client@2.21.0/dist/livekit-client.umd.min.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="livekit-config.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.21.0/dist/livekit-client.umd.min.js"></script>
+  <script src="livekit-media.js"></script>
 
   <!-- Question bank -->
   <script src="questions-01.js"></script>
@@ -723,6 +815,9 @@
     let currentRoomListener = null;
     let currentRoomData = null;
 
+    let microphoneOn = false;
+    let cameraOn = false;
+
     const homeScreen =
       document.getElementById("homeScreen");
 
@@ -816,6 +911,12 @@
     const studentScoreboardBody =
       document.getElementById("studentScoreboardBody");
 
+    const coachMediaStatus =
+      document.getElementById("coachMediaStatus");
+
+    const studentMediaStatus =
+      document.getElementById("studentMediaStatus");
+
     const errorMessage =
       document.getElementById("errorMessage");
 
@@ -901,9 +1002,7 @@
 
     function renderCoachTypes() {
       const grid =
-        document.getElementById(
-          "coachTypeGrid"
-        );
+        document.getElementById("coachTypeGrid");
 
       grid.innerHTML = "";
 
@@ -1228,19 +1327,16 @@
             action.className =
               "player-action";
 
-            const override =
-              player.limitOverride === true;
-
             const actionButton =
               document.createElement("button");
 
             actionButton.className =
-              override
+              player.limitOverride === true
                 ? "small-button red"
                 : "small-button secondary";
 
             actionButton.textContent =
-              override
+              player.limitOverride === true
                 ? "Lock"
                 : "Unlock";
 
@@ -1339,17 +1435,14 @@
       currentRoomData =
         room;
 
-      const players =
-        room.players || {};
-
       renderPlayers(
         coachPlayerList,
-        players
+        room.players
       );
 
       renderPlayers(
         studentPlayerList,
-        players
+        room.players
       );
 
       renderScoreboard(
@@ -1411,6 +1504,8 @@
       renderQuestion(room);
       renderBuzzState(room);
       updateButtons(room);
+      updateMediaStatus();
+      connectCompetitionMedia();
     }
 
     function renderQuestion(room) {
@@ -1424,13 +1519,12 @@
         return;
       }
 
-      const questionId =
-        room.questionIds[
-          room.currentQuestionIndex
-        ];
-
       const question =
-        getQuestionById(questionId);
+        getQuestionById(
+          room.questionIds[
+            room.currentQuestionIndex
+          ]
+        );
 
       if (!question) {
         return;
@@ -1569,6 +1663,118 @@
         room.status !== "started";
     }
 
+    async function connectCompetitionMedia() {
+      if (
+        !currentRoomCode ||
+        !window.LiveKitMedia
+      ) {
+        return;
+      }
+
+      if (LiveKitMedia.connected) {
+        return;
+      }
+
+      try {
+        await LiveKitMedia.connect(
+          "bq-" + currentRoomCode
+        );
+      } catch (error) {
+        console.warn(
+          "LiveKit connection failed:",
+          error
+        );
+      }
+    }
+
+    function updateMediaStatus() {
+      const text =
+        "Microphone: " +
+        (microphoneOn ? "On" : "Off") +
+        " | Camera: " +
+        (cameraOn ? "On" : "Off");
+
+      coachMediaStatus.textContent =
+        text;
+
+      studentMediaStatus.textContent =
+        text;
+    }
+
+    async function turnMicrophoneOn() {
+      try {
+        if (!currentRoomCode) {
+          showError("You are not in a room.");
+          return;
+        }
+
+        await LiveKitMedia.turnMicrophoneOn(
+          "bq-" + currentRoomCode
+        );
+
+        microphoneOn = true;
+        updateMediaStatus();
+
+      } catch (error) {
+        showError(
+          "Could not turn on microphone: " +
+          error.message
+        );
+      }
+    }
+
+    function turnMicrophoneOff() {
+      try {
+        LiveKitMedia.turnMicrophoneOff();
+
+        microphoneOn = false;
+        updateMediaStatus();
+
+      } catch (error) {
+        showError(
+          "Could not turn off microphone: " +
+          error.message
+        );
+      }
+    }
+
+    async function turnCameraOn() {
+      try {
+        if (!currentRoomCode) {
+          showError("You are not in a room.");
+          return;
+        }
+
+        await LiveKitMedia.turnCameraOn(
+          "bq-" + currentRoomCode
+        );
+
+        cameraOn = true;
+        updateMediaStatus();
+
+      } catch (error) {
+        showError(
+          "Could not turn on camera: " +
+          error.message
+        );
+      }
+    }
+
+    function turnCameraOff() {
+      try {
+        LiveKitMedia.turnCameraOff();
+
+        cameraOn = false;
+        updateMediaStatus();
+
+      } catch (error) {
+        showError(
+          "Could not turn off camera: " +
+          error.message
+        );
+      }
+    }
+
     function listenToRoom(roomCode) {
       currentRoomCode =
         roomCode;
@@ -1647,9 +1853,9 @@
           "coach";
 
         let roomCode;
-        let roomExists = true;
+        let exists = true;
 
-        while (roomExists) {
+        while (exists) {
           roomCode =
             makeRoomCode();
 
@@ -1658,7 +1864,7 @@
               "rooms/" + roomCode
             ).once("value");
 
-          roomExists =
+          exists =
             snapshot.exists();
         }
 
@@ -1748,24 +1954,22 @@
                 room.settings.questionCount
               );
 
-        const amount =
-          Math.min(
-            requested,
-            available.length
-          );
-
         const selected =
           shuffle(available)
-            .slice(0, amount);
-
-        const questionIds =
-          selected.map(
-            question => question.id
-          );
+            .slice(
+              0,
+              Math.min(
+                requested,
+                available.length
+              )
+            );
 
         await roomReference.update({
           status: "started",
-          questionIds: questionIds,
+          questionIds:
+            selected.map(
+              question => question.id
+            ),
           currentQuestionIndex: 0,
           buzzedBy: null,
           startedAt:
@@ -1905,15 +2109,13 @@
 
         await roomReference
           .child("buzzedBy")
-          .transaction(
-            value => {
-              if (value === null) {
-                return currentUser.uid;
-              }
-
-              return;
+          .transaction(value => {
+            if (value === null) {
+              return currentUser.uid;
             }
-          );
+
+            return;
+          });
 
       } catch (error) {
         showError(
@@ -2003,9 +2205,8 @@
         .child("players")
         .child(uid)
         .child("wrong")
-        .transaction(
-          value =>
-            Number(value || 0) + 1
+        .transaction(value =>
+          Number(value || 0) + 1
         );
 
       await roomReference
@@ -2084,8 +2285,131 @@
       });
     }
 
+    function updateMediaStatus() {
+      const text =
+        "Microphone: " +
+        (microphoneOn ? "On" : "Off") +
+        " | Camera: " +
+        (cameraOn ? "On" : "Off");
+
+      coachMediaStatus.textContent =
+        text;
+
+      studentMediaStatus.textContent =
+        text;
+    }
+
+    async function connectCompetitionMedia() {
+      if (
+        !currentRoomCode ||
+        !window.LiveKitMedia
+      ) {
+        return;
+      }
+
+      if (LiveKitMedia.connected) {
+        return;
+      }
+
+      try {
+        await LiveKitMedia.connect(
+          "bq-" + currentRoomCode
+        );
+      } catch (error) {
+        console.warn(
+          "LiveKit connection failed:",
+          error
+        );
+      }
+    }
+
+    async function turnMicrophoneOn() {
+      try {
+        if (!currentRoomCode) {
+          showError("You are not in a room.");
+          return;
+        }
+
+        await LiveKitMedia.turnMicrophoneOn(
+          "bq-" + currentRoomCode
+        );
+
+        microphoneOn = true;
+        updateMediaStatus();
+
+      } catch (error) {
+        showError(
+          "Could not turn on microphone: " +
+          error.message
+        );
+      }
+    }
+
+    function turnMicrophoneOff() {
+      try {
+        LiveKitMedia.turnMicrophoneOff();
+
+        microphoneOn = false;
+        updateMediaStatus();
+
+      } catch (error) {
+        showError(
+          "Could not turn off microphone: " +
+          error.message
+        );
+      }
+    }
+
+    async function turnCameraOn() {
+      try {
+        if (!currentRoomCode) {
+          showError("You are not in a room.");
+          return;
+        }
+
+        await LiveKitMedia.turnCameraOn(
+          "bq-" + currentRoomCode
+        );
+
+        cameraOn = true;
+        updateMediaStatus();
+
+      } catch (error) {
+        showError(
+          "Could not turn on camera: " +
+          error.message
+        );
+      }
+    }
+
+    function turnCameraOff() {
+      try {
+        LiveKitMedia.turnCameraOff();
+
+        cameraOn = false;
+        updateMediaStatus();
+
+      } catch (error) {
+        showError(
+          "Could not turn off camera: " +
+          error.message
+        );
+      }
+    }
+
     async function leaveRoom(role) {
       clearError();
+
+      if (
+        window.LiveKitMedia &&
+        LiveKitMedia.connected
+      ) {
+        LiveKitMedia.disconnect();
+      }
+
+      microphoneOn = false;
+      cameraOn = false;
+      updateMediaStatus();
 
       if (!currentRoomCode || !currentUser) {
         showOnly(homeScreen);
@@ -2127,9 +2451,13 @@
       currentRoomCode = null;
       currentRole = null;
       currentRoomData = null;
+      microphoneOn = false;
+      cameraOn = false;
 
       coachRoomArea.classList.add("hidden");
       studentRoomArea.classList.add("hidden");
+
+      updateMediaStatus();
     }
 
     document
@@ -2199,6 +2527,62 @@
       .addEventListener(
         "click",
         nextQuestion
+      );
+
+    document
+      .getElementById("coachMicOnButton")
+      .addEventListener(
+        "click",
+        turnMicrophoneOn
+      );
+
+    document
+      .getElementById("coachMicOffButton")
+      .addEventListener(
+        "click",
+        turnMicrophoneOff
+      );
+
+    document
+      .getElementById("coachCameraOnButton")
+      .addEventListener(
+        "click",
+        turnCameraOn
+      );
+
+    document
+      .getElementById("coachCameraOffButton")
+      .addEventListener(
+        "click",
+        turnCameraOff
+      );
+
+    document
+      .getElementById("studentMicOnButton")
+      .addEventListener(
+        "click",
+        turnMicrophoneOn
+      );
+
+    document
+      .getElementById("studentMicOffButton")
+      .addEventListener(
+        "click",
+        turnMicrophoneOff
+      );
+
+    document
+      .getElementById("studentCameraOnButton")
+      .addEventListener(
+        "click",
+        turnCameraOn
+      );
+
+    document
+      .getElementById("studentCameraOffButton")
+      .addEventListener(
+        "click",
+        turnCameraOff
       );
 
     document
@@ -2361,6 +2745,7 @@
     );
 
     updateCoachPreview();
+    updateMediaStatus();
   </script>
 </body>
 </html>
