@@ -10,9 +10,6 @@ window.LiveKitMedia = {
     participantIdentity,
     participantName
   ) {
-    /*
-      Already connected to this exact room.
-    */
     if (
       this.room &&
       this.connected &&
@@ -21,10 +18,6 @@ window.LiveKitMedia = {
       return this.room;
     }
 
-    /*
-      A connection is already being created.
-      Do not create another connection.
-    */
     if (this.connectingPromise) {
       return this.connectingPromise;
     }
@@ -56,17 +49,13 @@ window.LiveKitMedia = {
       throw new Error("LiveKit configuration is missing.");
     }
 
-    /*
-      Close a previous room only if it is a different room.
-    */
-    if (this.room && this.roomName !== roomName) {
+    if (this.room) {
       this.disconnect();
     }
 
     let tokenSource;
 
     if (
-      LivekitClient.TokenSource &&
       typeof LivekitClient.TokenSource
         .developmentTokenServer === "function"
     ) {
@@ -75,20 +64,12 @@ window.LiveKitMedia = {
           .developmentTokenServer(
             window.LIVEKIT_CONFIG.tokenServerId
           );
-    } else if (
-      LivekitClient.TokenSource &&
-      typeof LivekitClient.TokenSource
-        .sandboxTokenServer === "function"
-    ) {
+    } else {
       tokenSource =
         LivekitClient.TokenSource
           .sandboxTokenServer(
             window.LIVEKIT_CONFIG.tokenServerId
           );
-    } else {
-      throw new Error(
-        "No compatible LiveKit token server was found."
-      );
     }
 
     const tokenResult =
@@ -100,10 +81,10 @@ window.LiveKitMedia = {
 
     const room =
       new LivekitClient.Room({
-    adaptiveStream: false,
-    dynacast: false,
-    autoSubscribe: true
-  });
+        adaptiveStream: false,
+        dynacast: false,
+        autoSubscribe: true
+      });
 
     room.on(
       LivekitClient.RoomEvent.TrackSubscribed,
@@ -119,9 +100,11 @@ window.LiveKitMedia = {
       LivekitClient.RoomEvent.TrackUnsubscribed,
       track => {
         try {
-          track.detach();
+          track.detach().forEach(element => {
+            element.remove();
+          });
         } catch (error) {
-          console.warn("Could not detach track.", error);
+          console.warn(error);
         }
       }
     );
@@ -138,8 +121,8 @@ window.LiveKitMedia = {
     room.on(
       LivekitClient.RoomEvent.Disconnected,
       () => {
-        console.log("LiveKit room disconnected.");
         this.connected = false;
+        console.log("LiveKit disconnected.");
       }
     );
 
@@ -155,15 +138,20 @@ window.LiveKitMedia = {
     console.log(
       "LiveKit connected:",
       roomName,
-      "as",
       room.localParticipant.identity
     );
 
-    /*
-      Attach tracks that already existed before
-      this user joined the room.
-    */
-    room.remoteParticipants.forEach(
+    this.renderExistingRemoteTracks();
+
+    return room;
+  },
+
+  renderExistingRemoteTracks() {
+    if (!this.room) {
+      return;
+    }
+
+    this.room.remoteParticipants.forEach(
       participant => {
         participant.trackPublications.forEach(
           publication => {
@@ -176,20 +164,6 @@ window.LiveKitMedia = {
           }
         );
       }
-    );
-
-    return room;
-  },
-
-  async ensureConnected(
-    roomName,
-    participantIdentity,
-    participantName
-  ) {
-    return this.connect(
-      roomName,
-      participantIdentity,
-      participantName
     );
   },
 
@@ -275,33 +249,40 @@ window.LiveKitMedia = {
       return;
     }
 
-    /*
-      Do not attach same kind twice.
-    */
-    const existing =
+    const oldElement =
       box.querySelector(
-        '[data-livekit-kind="' + track.kind + '"]'
+        '[data-track-kind="' +
+        track.kind +
+        '"]'
       );
 
-    if (existing) {
-      return;
+    if (oldElement) {
+      oldElement.remove();
     }
 
     const element =
       track.attach();
 
-    element.dataset.livekitIdentity =
-      participant.identity;
-
-    element.dataset.livekitKind =
+    element.dataset.trackKind =
       track.kind;
+
+    element.dataset.participantIdentity =
+      participant.identity;
 
     if (track.kind === "video") {
       element.className =
         "livekit-video";
 
+      /*
+        Important for iPhone Safari:
+        inline playback and muted video autoplay.
+        Audio is received through a separate audio element.
+      */
       element.autoplay = true;
+      element.muted = true;
       element.playsInline = true;
+      element.setAttribute("playsinline", "");
+      element.setAttribute("webkit-playsinline", "");
     }
 
     if (track.kind === "audio") {
@@ -314,10 +295,13 @@ window.LiveKitMedia = {
 
     box.appendChild(element);
 
-    element.play().catch(() => {
-      console.log(
-        "Remote media may require a click to play."
-      );
+    requestAnimationFrame(() => {
+      element.play().catch(error => {
+        console.warn(
+          "Remote media playback needs user interaction:",
+          error
+        );
+      });
     });
   },
 
@@ -332,40 +316,37 @@ window.LiveKitMedia = {
       return;
     }
 
-    const existing =
+    const oldElement =
       box.querySelector(
-        '[data-livekit-kind="' + track.kind + '"]'
+        '[data-track-kind="' +
+        track.kind +
+        '"]'
       );
 
-    if (existing) {
-      return;
+    if (oldElement) {
+      oldElement.remove();
     }
 
     const element =
       track.attach();
 
-    element.dataset.livekitIdentity =
-      "local-preview";
-
-    element.dataset.livekitKind =
+    element.dataset.trackKind =
       track.kind;
 
     if (track.kind === "video") {
       element.className =
         "livekit-video";
-
       element.autoplay = true;
       element.muted = true;
       element.playsInline = true;
+      element.setAttribute("playsinline", "");
     }
 
     if (track.kind === "audio") {
       element.className =
         "livekit-audio";
-
       element.autoplay = true;
       element.muted = true;
-      element.controls = false;
     }
 
     box.appendChild(element);
@@ -378,34 +359,6 @@ window.LiveKitMedia = {
       );
 
     if (box) {
-      box.remove();
-    }
-  },
-
-  removeLocalPreview(kind) {
-    const elements =
-      document.querySelectorAll(
-        '[data-livekit-identity="local-preview"]'
-      );
-
-    elements.forEach(element => {
-      if (
-        !kind ||
-        element.dataset.livekitKind === kind
-      ) {
-        element.remove();
-      }
-    });
-
-    const box =
-      document.getElementById(
-        "livekit-participant-local-preview"
-      );
-
-    if (
-      box &&
-      box.querySelectorAll("video, audio").length === 0
-    ) {
       box.remove();
     }
   },
@@ -427,7 +380,7 @@ window.LiveKitMedia = {
     participantIdentity,
     participantName
   ) {
-    await this.ensureConnected(
+    await this.connect(
       roomName,
       participantIdentity,
       participantName
@@ -450,17 +403,15 @@ window.LiveKitMedia = {
       this.localTracks.push(track);
       this.attachLocalPreview(track);
     }
-
-    console.log("Microphone turned on.");
   },
 
   turnMicrophoneOff() {
-    const audioTracks =
+    const tracks =
       this.localTracks.filter(
         track => track.kind === "audio"
       );
 
-    audioTracks.forEach(track => {
+    tracks.forEach(track => {
       try {
         this.room.localParticipant
           .unpublishTrack(track);
@@ -468,21 +419,14 @@ window.LiveKitMedia = {
         console.warn(error);
       }
 
-      try {
-        track.detach();
-        track.stop();
-      } catch (error) {
-        console.warn(error);
-      }
+      track.detach();
+      track.stop();
     });
 
     this.localTracks =
       this.localTracks.filter(
         track => track.kind !== "audio"
       );
-
-    this.removeLocalPreview("audio");
-    console.log("Microphone turned off.");
   },
 
   async turnCameraOn(
@@ -490,7 +434,7 @@ window.LiveKitMedia = {
     participantIdentity,
     participantName
   ) {
-    await this.ensureConnected(
+    await this.connect(
       roomName,
       participantIdentity,
       participantName
@@ -513,17 +457,15 @@ window.LiveKitMedia = {
       this.localTracks.push(track);
       this.attachLocalPreview(track);
     }
-
-    console.log("Camera turned on.");
   },
 
   turnCameraOff() {
-    const videoTracks =
+    const tracks =
       this.localTracks.filter(
         track => track.kind === "video"
       );
 
-    videoTracks.forEach(track => {
+    tracks.forEach(track => {
       try {
         this.room.localParticipant
           .unpublishTrack(track);
@@ -531,21 +473,14 @@ window.LiveKitMedia = {
         console.warn(error);
       }
 
-      try {
-        track.detach();
-        track.stop();
-      } catch (error) {
-        console.warn(error);
-      }
+      track.detach();
+      track.stop();
     });
 
     this.localTracks =
       this.localTracks.filter(
         track => track.kind !== "video"
       );
-
-    this.removeLocalPreview("video");
-    console.log("Camera turned off.");
   },
 
   disconnect() {
@@ -559,14 +494,11 @@ window.LiveKitMedia = {
     this.room = null;
     this.roomName = null;
     this.connected = false;
-    this.connectingPromise = null;
 
     document
       .querySelectorAll(".livekit-participant")
       .forEach(element => {
         element.remove();
       });
-
-    console.log("Disconnected from LiveKit.");
   }
 };
