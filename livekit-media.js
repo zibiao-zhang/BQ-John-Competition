@@ -100,10 +100,10 @@ window.LiveKitMedia = {
 
     const room =
       new LivekitClient.Room({
-        adaptiveStream: true,
-        dynacast: true,
-        autoSubscribe: true
-      });
+    adaptiveStream: false,
+    dynacast: false,
+    autoSubscribe: true
+  });
 
     room.on(
       LivekitClient.RoomEvent.TrackSubscribed,
