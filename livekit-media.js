@@ -3,8 +3,47 @@ window.LiveKitMedia = {
   roomName: null,
   localTracks: [],
   connected: false,
+  connectingPromise: null,
 
   async connect(
+    roomName,
+    participantIdentity,
+    participantName
+  ) {
+    /*
+      Already connected to this exact room.
+    */
+    if (
+      this.room &&
+      this.connected &&
+      this.roomName === roomName
+    ) {
+      return this.room;
+    }
+
+    /*
+      A connection is already being created.
+      Do not create another connection.
+    */
+    if (this.connectingPromise) {
+      return this.connectingPromise;
+    }
+
+    this.connectingPromise =
+      this.createConnection(
+        roomName,
+        participantIdentity,
+        participantName
+      );
+
+    try {
+      return await this.connectingPromise;
+    } finally {
+      this.connectingPromise = null;
+    }
+  },
+
+  async createConnection(
     roomName,
     participantIdentity,
     participantName
@@ -18,18 +57,9 @@ window.LiveKitMedia = {
     }
 
     /*
-      If currently connected to another room,
-      disconnect before joining the new room.
+      Close a previous room only if it is a different room.
     */
-    if (
-      this.connected &&
-      this.room &&
-      this.roomName === roomName
-    ) {
-      return this.room;
-    }
-
-    if (this.room) {
+    if (this.room && this.roomName !== roomName) {
       this.disconnect();
     }
 
@@ -57,32 +87,25 @@ window.LiveKitMedia = {
           );
     } else {
       throw new Error(
-        "LiveKit development token server is unavailable."
+        "No compatible LiveKit token server was found."
       );
     }
 
-    /*
-      Force a fresh token request.
-      Each Coach and Student gets a unique identity.
-    */
     const tokenResult =
-      await tokenSource.fetch(
-        {
-          roomName: roomName,
-          participantIdentity: participantIdentity,
-          participantName: participantName
-        },
-        true
-      );
+      await tokenSource.fetch({
+        roomName: roomName,
+        participantIdentity: participantIdentity,
+        participantName: participantName
+      });
 
-    this.room =
+    const room =
       new LivekitClient.Room({
         adaptiveStream: true,
         dynacast: true,
         autoSubscribe: true
       });
 
-    this.room.on(
+    room.on(
       LivekitClient.RoomEvent.TrackSubscribed,
       (track, publication, participant) => {
         this.attachRemoteTrack(
@@ -92,21 +115,18 @@ window.LiveKitMedia = {
       }
     );
 
-    this.room.on(
+    room.on(
       LivekitClient.RoomEvent.TrackUnsubscribed,
       track => {
         try {
           track.detach();
         } catch (error) {
-          console.warn(
-            "Could not detach remote track:",
-            error
-          );
+          console.warn("Could not detach track.", error);
         }
       }
     );
 
-    this.room.on(
+    room.on(
       LivekitClient.RoomEvent.ParticipantDisconnected,
       participant => {
         this.removeParticipant(
@@ -115,26 +135,35 @@ window.LiveKitMedia = {
       }
     );
 
-    await this.room.connect(
+    room.on(
+      LivekitClient.RoomEvent.Disconnected,
+      () => {
+        console.log("LiveKit room disconnected.");
+        this.connected = false;
+      }
+    );
+
+    await room.connect(
       tokenResult.serverUrl,
       tokenResult.participantToken
     );
 
-    this.connected = true;
+    this.room = room;
     this.roomName = roomName;
+    this.connected = true;
 
     console.log(
-      "Connected to LiveKit room:",
+      "LiveKit connected:",
       roomName,
-      "Identity:",
-      this.room.localParticipant.identity
+      "as",
+      room.localParticipant.identity
     );
 
     /*
-      Attach tracks from participants already
-      in the room when we connected.
+      Attach tracks that already existed before
+      this user joined the room.
     */
-    this.room.remoteParticipants.forEach(
+    room.remoteParticipants.forEach(
       participant => {
         participant.trackPublications.forEach(
           publication => {
@@ -149,7 +178,7 @@ window.LiveKitMedia = {
       }
     );
 
-    return this.room;
+    return room;
   },
 
   async ensureConnected(
@@ -157,19 +186,11 @@ window.LiveKitMedia = {
     participantIdentity,
     participantName
   ) {
-    if (
-      !this.connected ||
-      !this.room ||
-      this.roomName !== roomName
-    ) {
-      await this.connect(
-        roomName,
-        participantIdentity,
-        participantName
-      );
-    }
-
-    return this.room;
+    return this.connect(
+      roomName,
+      participantIdentity,
+      participantName
+    );
   },
 
   getMediaContainer() {
@@ -254,6 +275,18 @@ window.LiveKitMedia = {
       return;
     }
 
+    /*
+      Do not attach same kind twice.
+    */
+    const existing =
+      box.querySelector(
+        '[data-livekit-kind="' + track.kind + '"]'
+      );
+
+    if (existing) {
+      return;
+    }
+
     const element =
       track.attach();
 
@@ -283,7 +316,7 @@ window.LiveKitMedia = {
 
     element.play().catch(() => {
       console.log(
-        "Browser may require a user click to play remote media."
+        "Remote media may require a click to play."
       );
     });
   },
@@ -296,6 +329,15 @@ window.LiveKitMedia = {
       );
 
     if (!box) {
+      return;
+    }
+
+    const existing =
+      box.querySelector(
+        '[data-livekit-kind="' + track.kind + '"]'
+      );
+
+    if (existing) {
       return;
     }
 
@@ -355,16 +397,16 @@ window.LiveKitMedia = {
       }
     });
 
-    const localBox =
+    const box =
       document.getElementById(
         "livekit-participant-local-preview"
       );
 
     if (
-      localBox &&
-      localBox.querySelectorAll("video, audio").length === 0
+      box &&
+      box.querySelectorAll("video, audio").length === 0
     ) {
-      localBox.remove();
+      box.remove();
     }
   },
 
@@ -423,10 +465,7 @@ window.LiveKitMedia = {
         this.room.localParticipant
           .unpublishTrack(track);
       } catch (error) {
-        console.warn(
-          "Could not unpublish microphone:",
-          error
-        );
+        console.warn(error);
       }
 
       try {
@@ -443,7 +482,6 @@ window.LiveKitMedia = {
       );
 
     this.removeLocalPreview("audio");
-
     console.log("Microphone turned off.");
   },
 
@@ -490,10 +528,7 @@ window.LiveKitMedia = {
         this.room.localParticipant
           .unpublishTrack(track);
       } catch (error) {
-        console.warn(
-          "Could not unpublish camera:",
-          error
-        );
+        console.warn(error);
       }
 
       try {
@@ -510,7 +545,6 @@ window.LiveKitMedia = {
       );
 
     this.removeLocalPreview("video");
-
     console.log("Camera turned off.");
   },
 
@@ -525,6 +559,7 @@ window.LiveKitMedia = {
     this.room = null;
     this.roomName = null;
     this.connected = false;
+    this.connectingPromise = null;
 
     document
       .querySelectorAll(".livekit-participant")
