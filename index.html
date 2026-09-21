@@ -417,7 +417,6 @@
       </div>
     </header>
 
-    <!-- HOME -->
     <section id="homeScreen" class="card">
       <h2>Join or Create a Competition</h2>
 
@@ -430,23 +429,25 @@
       </button>
     </section>
 
-    <!-- COACH SETUP -->
     <section id="coachScreen" class="card hidden">
       <h2>Coach Setup</h2>
 
       <label>Start Reference</label>
+
       <div class="reference-grid">
         <select id="coachStartChapter"></select>
         <select id="coachStartVerse"></select>
       </div>
 
       <label>End Reference</label>
+
       <div class="reference-grid">
         <select id="coachEndChapter"></select>
         <select id="coachEndVerse"></select>
       </div>
 
       <label>Question Types</label>
+
       <div id="coachTypeGrid" class="type-grid"></div>
 
       <label for="coachQuestionCount">
@@ -505,11 +506,11 @@
       </button>
     </section>
 
-    <!-- STUDENT LOBBY -->
     <section id="studentScreen" class="card hidden">
       <h2>Join Competition</h2>
 
       <label for="studentName">Your Name</label>
+
       <input
         id="studentName"
         type="text"
@@ -518,6 +519,7 @@
       >
 
       <label for="roomCodeInput">Room Code</label>
+
       <input
         id="roomCodeInput"
         type="text"
@@ -546,7 +548,6 @@
       </button>
     </section>
 
-    <!-- COACH COMPETITION -->
     <section id="coachCompetitionScreen" class="card hidden">
       <h2>Coach Competition</h2>
 
@@ -574,22 +575,28 @@
         Next Question
       </button>
 
-     <div class="button-row">
-  <button id="coachMicButton" class="secondary">
-    Turn Microphone On
-  </button>
+      <div class="button-row">
+        <button id="coachMicButton" class="secondary">
+          Turn Microphone On
+        </button>
 
-  <button id="coachCameraButton" class="secondary">
-    Turn Camera On
-  </button>
-</div>
+        <button id="coachCameraButton" class="secondary">
+          Turn Camera On
+        </button>
+      </div>
+
+      <button id="coachEnableAudioButton" class="gray-button">
+        Enable Remote Audio
+      </button>
 
       <div id="coachMediaStatus" class="media-status">
         Microphone: Off | Camera: Off
       </div>
 
-      <div id="coachLivekitMediaContainer"
-           class="livekit-media-container"></div>
+      <div
+        id="coachLivekitMediaContainer"
+        class="livekit-media-container"
+      ></div>
 
       <button id="coachLeaveCompetitionButton" class="gray-button">
         Leave Room
@@ -608,12 +615,12 @@
               <th>Action</th>
             </tr>
           </thead>
+
           <tbody id="coachScoreboardBody"></tbody>
         </table>
       </div>
     </section>
 
-    <!-- STUDENT COMPETITION -->
     <section id="studentCompetitionScreen" class="card hidden">
       <h2>Student Competition</h2>
 
@@ -631,22 +638,28 @@
         Buzz In
       </button>
 
-    <div class="button-row">
-  <button id="studentMicButton" class="secondary">
-    Turn Microphone On
-  </button>
+      <div class="button-row">
+        <button id="studentMicButton" class="secondary">
+          Turn Microphone On
+        </button>
 
-  <button id="studentCameraButton" class="secondary">
-    Turn Camera On
-  </button>
-</div>
+        <button id="studentCameraButton" class="secondary">
+          Turn Camera On
+        </button>
+      </div>
+
+      <button id="studentEnableAudioButton" class="gray-button">
+        Enable Remote Audio
+      </button>
 
       <div id="studentMediaStatus" class="media-status">
         Microphone: Off | Camera: Off
       </div>
 
-      <div id="studentLivekitMediaContainer"
-           class="livekit-media-container"></div>
+      <div
+        id="studentLivekitMediaContainer"
+        class="livekit-media-container"
+      ></div>
 
       <button id="studentLeaveCompetitionButton" class="red">
         Leave Room
@@ -664,6 +677,7 @@
               <th>Status</th>
             </tr>
           </thead>
+
           <tbody id="studentScoreboardBody"></tbody>
         </table>
       </div>
@@ -672,7 +686,6 @@
     <div id="errorMessage" class="error hidden"></div>
   </main>
 
-  <!-- Firebase and LiveKit -->
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
@@ -682,7 +695,6 @@
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.21.0/dist/livekit-client.umd.min.js"></script>
   <script src="livekit-media.js"></script>
 
-  <!-- Question bank -->
   <script src="questions-01.js"></script>
   <script src="questions-02.js"></script>
   <script src="questions-03.js"></script>
@@ -706,7 +718,9 @@
   <script src="questions-21.js"></script>
 
   <script>
-    firebase.initializeApp(window.FIREBASE_CONFIG);
+    firebase.initializeApp(
+      window.FIREBASE_CONFIG
+    );
 
     const auth = firebase.auth();
     const database = firebase.database();
@@ -751,16 +765,13 @@
     let currentRole = null;
     let currentRoomListener = null;
     let currentRoomData = null;
+
     let microphoneOn = false;
     let cameraOn = false;
+    let lastSpokenQuestionKey = "";
 
-    const $ = id => document.getElementById(id);
-
-    const homeScreen = $("homeScreen");
-    const coachScreen = $("coachScreen");
-    const studentScreen = $("studentScreen");
-    const coachCompetitionScreen = $("coachCompetitionScreen");
-    const studentCompetitionScreen = $("studentCompetitionScreen");
+    const $ = id =>
+      document.getElementById(id);
 
     function showError(message) {
       $("errorMessage").textContent = message;
@@ -774,11 +785,11 @@
 
     function showOnly(screen) {
       [
-        homeScreen,
-        coachScreen,
-        studentScreen,
-        coachCompetitionScreen,
-        studentCompetitionScreen
+        $("homeScreen"),
+        $("coachScreen"),
+        $("studentScreen"),
+        $("coachCompetitionScreen"),
+        $("studentCompetitionScreen")
       ].forEach(element => {
         element.classList.add("hidden");
       });
@@ -794,7 +805,9 @@
 
       for (let i = 0; i < 6; i++) {
         code += characters[
-          Math.floor(Math.random() * characters.length)
+          Math.floor(
+            Math.random() * characters.length
+          )
         ];
       }
 
@@ -804,12 +817,22 @@
     function shuffle(array) {
       const copied = [...array];
 
-      for (let i = copied.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
+      for (
+        let index = copied.length - 1;
+        index > 0;
+        index--
+      ) {
+        const randomIndex =
+          Math.floor(
+            Math.random() * (index + 1)
+          );
 
-        [copied[i], copied[j]] = [
-          copied[j],
-          copied[i]
+        [
+          copied[index],
+          copied[randomIndex]
+        ] = [
+          copied[randomIndex],
+          copied[index]
         ];
       }
 
@@ -838,35 +861,49 @@
       const grid = $("coachTypeGrid");
       grid.innerHTML = "";
 
-      const available = new Set(
+      const existingTypes = new Set(
         QUESTION_BANK
           .map(question => question.type)
           .filter(Boolean)
       );
 
       QUESTION_TYPE_ORDER
-        .filter(type => available.has(type))
+        .filter(type => existingTypes.has(type))
         .forEach(type => {
-          const label = document.createElement("label");
+          const label =
+            document.createElement("label");
+
           label.className = "type-option";
 
-          const checkbox = document.createElement("input");
+          const checkbox =
+            document.createElement("input");
+
           checkbox.type = "checkbox";
           checkbox.name = "coachType";
           checkbox.value = type;
           checkbox.checked = true;
-          checkbox.addEventListener("change", updateCoachPreview);
 
-          const code = document.createElement("span");
+          checkbox.addEventListener(
+            "change",
+            updateCoachPreview
+          );
+
+          const code =
+            document.createElement("span");
+
           code.className = "type-code";
           code.textContent = type;
 
-          const name = document.createElement("span");
-          name.textContent = TYPE_NAMES[type] || type;
+          const name =
+            document.createElement("span");
+
+          name.textContent =
+            TYPE_NAMES[type] || type;
 
           label.appendChild(checkbox);
           label.appendChild(code);
           label.appendChild(name);
+
           grid.appendChild(label);
         });
     }
@@ -875,14 +912,21 @@
       selectElement.innerHTML = "";
 
       for (let chapter = 1; chapter <= 21; chapter++) {
-        const option = document.createElement("option");
+        const option =
+          document.createElement("option");
+
         option.value = chapter;
         option.textContent = "John " + chapter;
+
         selectElement.appendChild(option);
       }
     }
 
-    function populateVerses(selectElement, chapter, selectedVerse) {
+    function populateVerses(
+      selectElement,
+      chapter,
+      selectedVerse
+    ) {
       selectElement.innerHTML = "";
 
       for (
@@ -890,9 +934,12 @@
         verse <= CHAPTER_VERSES[chapter];
         verse++
       ) {
-        const option = document.createElement("option");
+        const option =
+          document.createElement("option");
+
         option.value = verse;
         option.textContent = "Verse " + verse;
+
         selectElement.appendChild(option);
       }
 
@@ -905,50 +952,76 @@
 
     function getCoachSettings() {
       return {
-        startChapter: Number($("coachStartChapter").value),
-        startVerse: Number($("coachStartVerse").value),
-        endChapter: Number($("coachEndChapter").value),
-        endVerse: Number($("coachEndVerse").value),
-        questionTypes: getSelectedTypes(),
+        startChapter:
+          Number($("coachStartChapter").value),
+
+        startVerse:
+          Number($("coachStartVerse").value),
+
+        endChapter:
+          Number($("coachEndChapter").value),
+
+        endVerse:
+          Number($("coachEndVerse").value),
+
+        questionTypes:
+          getSelectedTypes(),
+
         questionCount:
           $("coachQuestionCount").value === "all"
             ? "all"
-            : Number($("coachQuestionCount").value),
-        maxCorrect: Number($("maxCorrectSelect").value)
+            : Number(
+                $("coachQuestionCount").value
+              ),
+
+        maxCorrect:
+          Number($("maxCorrectSelect").value)
       };
     }
 
     function getQuestionsForSettings(settings) {
-      const start = getPosition(
-        settings.startChapter,
-        settings.startVerse
-      );
+      const start =
+        getPosition(
+          settings.startChapter,
+          settings.startVerse
+        );
 
-      const end = getPosition(
-        settings.endChapter,
-        settings.endVerse
-      );
+      const end =
+        getPosition(
+          settings.endChapter,
+          settings.endVerse
+        );
 
       return QUESTION_BANK.filter(question => {
-        const position = getPosition(
-          question.chapter,
-          question.verse
-        );
+        const position =
+          getPosition(
+            question.chapter,
+            question.verse
+          );
 
         return (
           position >= start &&
           position <= end &&
-          settings.questionTypes.includes(question.type)
+          settings.questionTypes.includes(
+            question.type
+          )
         );
       });
     }
 
     function updateCoachPreview() {
-      const settings = getCoachSettings();
+      const settings =
+        getCoachSettings();
 
       if (
-        getPosition(settings.startChapter, settings.startVerse) >
-        getPosition(settings.endChapter, settings.endVerse)
+        getPosition(
+          settings.startChapter,
+          settings.startVerse
+        ) >
+        getPosition(
+          settings.endChapter,
+          settings.endVerse
+        )
       ) {
         $("coachSetupPreview").textContent =
           "Invalid reference range.";
@@ -984,126 +1057,211 @@
       listElement.innerHTML = "";
 
       if (!players) {
-        const item = document.createElement("li");
+        const item =
+          document.createElement("li");
+
         item.className = "player-item";
-        item.textContent = "No players have joined yet.";
+        item.textContent =
+          "No players have joined yet.";
+
         listElement.appendChild(item);
         return;
       }
 
-      Object.entries(players).forEach(([uid, player]) => {
-        const item = document.createElement("li");
-        item.className = "player-item";
+      Object.entries(players).forEach(
+        ([uid, player]) => {
+          const item =
+            document.createElement("li");
 
-        if (
-          currentRoomData &&
-          currentRoomData.buzzedBy === uid
-        ) {
-          item.classList.add("buzzed");
+          item.className = "player-item";
+
+          if (
+            currentRoomData &&
+            currentRoomData.buzzedBy === uid
+          ) {
+            item.classList.add("buzzed");
+          }
+
+          const maxCorrect =
+            currentRoomData &&
+            currentRoomData.settings
+              ? Number(
+                  currentRoomData.settings.maxCorrect
+                )
+              : 10;
+
+          const correct =
+            Number(player.correct || 0);
+
+          if (
+            correct >= maxCorrect &&
+            player.limitOverride !== true
+          ) {
+            item.classList.add("limit-reached");
+          }
+
+          item.textContent =
+            player.name || "Unnamed";
+
+          const role =
+            document.createElement("span");
+
+          role.className = "player-role";
+
+          role.textContent =
+            player.role === "coach"
+              ? "Coach"
+              : "Student";
+
+          const score =
+            document.createElement("span");
+
+          score.className = "player-score";
+
+          score.textContent =
+            "Correct: " +
+            correct +
+            " / " +
+            maxCorrect +
+            " | Wrong: " +
+            Number(player.wrong || 0);
+
+          item.appendChild(role);
+          item.appendChild(score);
+
+          listElement.appendChild(item);
         }
-
-        const maxCorrect =
-          currentRoomData && currentRoomData.settings
-            ? Number(currentRoomData.settings.maxCorrect)
-            : 10;
-
-        const correct = Number(player.correct || 0);
-
-        if (correct >= maxCorrect) {
-          item.classList.add("limit-reached");
-        }
-
-        item.textContent = player.name || "Unnamed";
-
-        const role = document.createElement("span");
-        role.className = "player-role";
-        role.textContent =
-          player.role === "coach"
-            ? "Coach"
-            : "Student";
-
-        const score = document.createElement("span");
-        score.className = "player-score";
-        score.textContent =
-          "Correct: " +
-          correct +
-          " / " +
-          maxCorrect +
-          " | Wrong: " +
-          Number(player.wrong || 0);
-
-        item.appendChild(role);
-        item.appendChild(score);
-
-        if (
-          currentRole === "coach" &&
-          player.role === "student"
-        ) {
-          const actions = document.createElement("div");
-          actions.className = "player-action";
-
-          const button = document.createElement("button");
-          button.className =
-            player.limitOverride === true
-              ? "small-button red"
-              : "small-button secondary";
-
-          button.textContent =
-            player.limitOverride === true
-              ? "Lock"
-              : "Unlock";
-
-          button.addEventListener("click", () => {
-            toggleStudentLimit(uid);
-          });
-
-          actions.appendChild(button);
-          item.appendChild(actions);
-        }
-
-        listElement.appendChild(item);
-      });
+      );
     }
 
     function renderScoreboard(body, room) {
       body.innerHTML = "";
 
       Object.entries(room.players || {})
-        .filter(([, player]) => player.role === "student")
+        .filter(([, player]) =>
+          player.role === "student"
+        )
         .sort(([, a], [, b]) =>
-          Number(b.correct || 0) - Number(a.correct || 0)
+          Number(b.correct || 0) -
+          Number(a.correct || 0)
         )
         .forEach(([uid, player]) => {
-          const row = document.createElement("tr");
+          const row =
+            document.createElement("tr");
 
-          const correct = Number(player.correct || 0);
-          const maxCorrect = Number(room.settings.maxCorrect);
+          const correct =
+            Number(player.correct || 0);
 
-          const nameCell = document.createElement("td");
-          const correctCell = document.createElement("td");
-          const wrongCell = document.createElement("td");
-          const statusCell = document.createElement("td");
+          const maxCorrect =
+            Number(room.settings.maxCorrect);
+
+          const nameCell =
+            document.createElement("td");
+
+          const correctCell =
+            document.createElement("td");
+
+          const wrongCell =
+            document.createElement("td");
+
+          const statusCell =
+            document.createElement("td");
 
           nameCell.textContent = player.name;
-          correctCell.textContent = correct + " / " + maxCorrect;
-          wrongCell.textContent = Number(player.wrong || 0);
+
+          correctCell.textContent =
+            correct + " / " + maxCorrect;
+
+          wrongCell.textContent =
+            Number(player.wrong || 0);
 
           if (player.limitOverride === true) {
-            statusCell.textContent = "Manual override";
+            statusCell.textContent =
+              "Manual override";
           } else if (correct >= maxCorrect) {
-            statusCell.textContent = "Limit reached";
+            statusCell.textContent =
+              "Limit reached";
           } else if (room.buzzedBy === uid) {
-            statusCell.textContent = "Buzzed in";
+            statusCell.textContent =
+              "Buzzed in";
+          } else if (room.questionOpen !== true) {
+            statusCell.textContent =
+              "Wait for next question";
           } else {
-            statusCell.textContent = "Ready";
+            statusCell.textContent =
+              "Ready";
           }
 
           row.appendChild(nameCell);
           row.appendChild(correctCell);
           row.appendChild(wrongCell);
           row.appendChild(statusCell);
+
+          if (currentRole === "coach") {
+            const actionCell =
+              document.createElement("td");
+
+            if (
+              correct >= maxCorrect ||
+              player.limitOverride === true
+            ) {
+              const actionButton =
+                document.createElement("button");
+
+              actionButton.className =
+                player.limitOverride === true
+                  ? "small-button red"
+                  : "small-button secondary";
+
+              actionButton.textContent =
+                player.limitOverride === true
+                  ? "Lock"
+                  : "Unlock";
+
+              actionButton.addEventListener(
+                "click",
+                () => {
+                  toggleStudentLimit(uid);
+                }
+              );
+
+              actionCell.appendChild(actionButton);
+            } else {
+              actionCell.textContent = "-";
+            }
+
+            row.appendChild(actionCell);
+          }
+
           body.appendChild(row);
         });
+    }
+
+    function setMediaContainerForCurrentScreen() {
+      let container = null;
+
+      if (
+        !$("coachCompetitionScreen")
+          .classList.contains("hidden")
+      ) {
+        container =
+          $("coachLivekitMediaContainer");
+      }
+
+      if (
+        !$("studentCompetitionScreen")
+          .classList.contains("hidden")
+      ) {
+        container =
+          $("studentLivekitMediaContainer");
+      }
+
+      if (
+        container &&
+        window.LiveKitMedia
+      ) {
+        LiveKitMedia.setMediaContainer(container);
+      }
     }
 
     function renderQuestion(room) {
@@ -1117,9 +1275,12 @@
         return;
       }
 
-      const question = getQuestionById(
-        room.questionIds[room.currentQuestionIndex]
-      );
+      const question =
+        getQuestionById(
+          room.questionIds[
+            room.currentQuestionIndex
+          ]
+        );
 
       if (!question) {
         return;
@@ -1133,13 +1294,17 @@
         " | " +
         question.type +
         " - " +
-        (TYPE_NAMES[question.type] || question.type);
+        (TYPE_NAMES[question.type] ||
+          question.type);
 
       $("coachQuestionLabel").textContent = label;
       $("studentQuestionLabel").textContent = label;
 
-      $("coachQuestionText").textContent = question.question;
-      $("studentQuestionText").textContent = question.question;
+      $("coachQuestionText").textContent =
+        question.question;
+
+      $("studentQuestionText").textContent =
+        question.question;
 
       $("coachQuestionReference").textContent =
         "Reference: " + question.reference;
@@ -1149,6 +1314,66 @@
 
       $("coachQuestionBox").classList.remove("hidden");
       $("studentQuestionBox").classList.remove("hidden");
+
+      speakQuestionForEveryone(
+        room,
+        question
+      );
+    }
+
+    function speakQuestionForEveryone(room, question) {
+      if (
+        room.questionOpen !== true ||
+        !question
+      ) {
+        return;
+      }
+
+      const key =
+        room.currentQuestionIndex +
+        "-" +
+        String(room.questionStartedAt || "");
+
+      if (key === lastSpokenQuestionKey) {
+        return;
+      }
+
+      lastSpokenQuestionKey = key;
+
+      const typeName =
+        TYPE_NAMES[question.type] ||
+        question.type;
+
+      const text =
+        typeName +
+        ". " +
+        question.question;
+
+      const startAt =
+        Number(room.questionStartedAt || 0);
+
+      const delay =
+        startAt > 0
+          ? Math.max(
+              0,
+              startAt + 1500 - Date.now()
+            )
+          : 0;
+
+      window.setTimeout(() => {
+        if ("speechSynthesis" in window) {
+          window.speechSynthesis.cancel();
+
+          const utterance =
+            new SpeechSynthesisUtterance(text);
+
+          utterance.lang = "en-US";
+          utterance.rate = 0.85;
+          utterance.pitch = 1.0;
+
+          window.speechSynthesis.speak(utterance);
+        }
+      }, delay);
     }
 
     function renderBuzz(room) {
@@ -1159,7 +1384,8 @@
       }
 
       const player =
-        room.players && room.players[room.buzzedBy];
+        room.players &&
+        room.players[room.buzzedBy];
 
       const name =
         player && player.name
@@ -1185,23 +1411,32 @@
       const reachedLimit =
         currentRole === "student" &&
         player &&
-        Number(player.correct || 0) >= Number(room.settings.maxCorrect) &&
+        Number(player.correct || 0) >=
+          Number(room.settings.maxCorrect) &&
         player.limitOverride !== true;
 
       const canBuzz =
         currentRole === "student" &&
         room.status === "started" &&
+        room.questionOpen === true &&
         !room.buzzedBy &&
         !reachedLimit;
 
-      $("studentBuzzButton").disabled = !canBuzz;
+      $("studentBuzzButton").disabled =
+        !canBuzz;
 
       if (reachedLimit) {
-        $("studentBuzzButton").textContent = "Limit Reached";
+        $("studentBuzzButton").textContent =
+          "Limit Reached";
+      } else if (room.questionOpen !== true) {
+        $("studentBuzzButton").textContent =
+          "Wait for Next Question";
       } else if (room.buzzedBy) {
-        $("studentBuzzButton").textContent = "Someone Has Buzzed In";
+        $("studentBuzzButton").textContent =
+          "Someone Has Buzzed In";
       } else {
-        $("studentBuzzButton").textContent = "Buzz In";
+        $("studentBuzzButton").textContent =
+          "Buzz In";
       }
 
       $("coachCorrectButton").disabled =
@@ -1220,67 +1455,50 @@
     }
 
     function updateMediaStatus() {
-  const text =
-    "Microphone: " +
-    (microphoneOn ? "On" : "Off") +
-    " | Camera: " +
-    (cameraOn ? "On" : "Off");
+      const text =
+        "Microphone: " +
+        (microphoneOn ? "On" : "Off") +
+        " | Camera: " +
+        (cameraOn ? "On" : "Off");
 
-  coachMediaStatus.textContent = text;
-  studentMediaStatus.textContent = text;
+      $("coachMediaStatus").textContent = text;
+      $("studentMediaStatus").textContent = text;
 
-  const micText =
-    microphoneOn
-      ? "Turn Microphone Off"
-      : "Turn Microphone On";
+      const micText =
+        microphoneOn
+          ? "Turn Microphone Off"
+          : "Turn Microphone On";
 
-  const cameraText =
-    cameraOn
-      ? "Turn Camera Off"
-      : "Turn Camera On";
+      const cameraText =
+        cameraOn
+          ? "Turn Camera Off"
+          : "Turn Camera On";
 
-  const micClass =
-    microphoneOn
-      ? "gray-button"
-      : "secondary";
+      const micClass =
+        microphoneOn
+          ? "gray-button"
+          : "secondary";
 
-  const cameraClass =
-    cameraOn
-      ? "gray-button"
-      : "secondary";
+      const cameraClass =
+        cameraOn
+          ? "gray-button"
+          : "secondary";
 
-  const coachMicButton =
-    document.getElementById("coachMicButton");
+      $("coachMicButton").textContent = micText;
+      $("studentMicButton").textContent = micText;
 
-  const studentMicButton =
-    document.getElementById("studentMicButton");
+      $("coachCameraButton").textContent =
+        cameraText;
 
-  const coachCameraButton =
-    document.getElementById("coachCameraButton");
+      $("studentCameraButton").textContent =
+        cameraText;
 
-  const studentCameraButton =
-    document.getElementById("studentCameraButton");
+      $("coachMicButton").className = micClass;
+      $("studentMicButton").className = micClass;
 
-  if (coachMicButton) {
-    coachMicButton.textContent = micText;
-    coachMicButton.className = micClass;
-  }
-
-  if (studentMicButton) {
-    studentMicButton.textContent = micText;
-    studentMicButton.className = micClass;
-  }
-
-  if (coachCameraButton) {
-    coachCameraButton.textContent = cameraText;
-    coachCameraButton.className = cameraClass;
-  }
-
-  if (studentCameraButton) {
-    studentCameraButton.textContent = cameraText;
-    studentCameraButton.className = cameraClass;
-  }
-}
+      $("coachCameraButton").className = cameraClass;
+      $("studentCameraButton").className = cameraClass;
+    }
 
     async function connectCompetitionMedia() {
       if (
@@ -1297,7 +1515,7 @@
           currentRoomData.players &&
           currentRoomData.players[currentUser.uid];
 
-        const playerName =
+        const name =
           player && player.name
             ? player.name
             : currentRole || "Participant";
@@ -1305,10 +1523,15 @@
         await LiveKitMedia.connect(
           "bq-" + currentRoomCode,
           "firebase-" + currentUser.uid,
-          playerName
+          name
         );
+
+        setMediaContainerForCurrentScreen();
       } catch (error) {
-        console.warn("LiveKit connection failed:", error);
+        console.warn(
+          "LiveKit connection failed:",
+          error
+        );
       }
     }
 
@@ -1316,46 +1539,68 @@
       if (!room) {
         showError("Room no longer exists.");
         resetLocalState();
-        showOnly(homeScreen);
+        showOnly($("homeScreen"));
         return;
       }
 
       currentRoomData = room;
 
-      renderPlayers($("coachPlayerList"), room.players);
-      renderPlayers($("studentPlayerList"), room.players);
+      renderPlayers(
+        $("coachPlayerList"),
+        room.players
+      );
 
-      renderScoreboard($("coachScoreboardBody"), room);
-      renderScoreboard($("studentScoreboardBody"), room);
+      renderPlayers(
+        $("studentPlayerList"),
+        room.players
+      );
+
+      renderScoreboard(
+        $("coachScoreboardBody"),
+        room
+      );
+
+      renderScoreboard(
+        $("studentScoreboardBody"),
+        room
+      );
 
       if (currentRole === "coach") {
         showOnly(
-          room.status === "started" || room.status === "finished"
-            ? coachCompetitionScreen
-            : coachScreen
+          room.status === "started" ||
+          room.status === "finished"
+            ? $("coachCompetitionScreen")
+            : $("coachScreen")
         );
       }
 
       if (currentRole === "student") {
         showOnly(
-          room.status === "started" || room.status === "finished"
-            ? studentCompetitionScreen
-            : studentScreen
+          room.status === "started" ||
+          room.status === "finished"
+            ? $("studentCompetitionScreen")
+            : $("studentScreen")
         );
       }
 
       if (room.status === "waiting") {
-        $("coachStatus").textContent = "Waiting for students.";
+        $("coachStatus").textContent =
+          "Waiting for students.";
+
         $("studentStatus").textContent =
           "Waiting for the coach to start.";
       }
 
       if (room.status === "started") {
         $("coachCompetitionStatus").textContent =
-          "Competition is in progress.";
+          room.questionOpen === true
+            ? "Question is open for Buzz In."
+            : "Question closed. Click Next Question.";
 
         $("studentCompetitionStatus").textContent =
-          "Competition is in progress.";
+          room.questionOpen === true
+            ? "Question is open."
+            : "Wait for Coach to start the next question.";
       }
 
       if (room.status === "finished") {
@@ -1389,9 +1634,12 @@
       currentRoomListener =
         database.ref("rooms/" + roomCode);
 
-      currentRoomListener.on("value", snapshot => {
-        renderRoom(snapshot.val());
-      });
+      currentRoomListener.on(
+        "value",
+        snapshot => {
+          renderRoom(snapshot.val());
+        }
+      );
     }
 
     async function signInAnonymously() {
@@ -1399,7 +1647,9 @@
         return currentUser;
       }
 
-      const result = await auth.signInAnonymously();
+      const result =
+        await auth.signInAnonymously();
+
       currentUser = result.user;
 
       return currentUser;
@@ -1411,25 +1661,39 @@
       const settings = getCoachSettings();
 
       if (
-        getPosition(settings.startChapter, settings.startVerse) >
-        getPosition(settings.endChapter, settings.endVerse)
+        getPosition(
+          settings.startChapter,
+          settings.startVerse
+        ) >
+        getPosition(
+          settings.endChapter,
+          settings.endVerse
+        )
       ) {
         showError("Invalid reference range.");
         return;
       }
 
       if (settings.questionTypes.length === 0) {
-        showError("Select at least one question type.");
+        showError(
+          "Select at least one question type."
+        );
         return;
       }
 
-      if (getQuestionsForSettings(settings).length === 0) {
-        showError("No questions match this selection.");
+      if (
+        getQuestionsForSettings(settings).length === 0
+      ) {
+        showError(
+          "No questions match this selection."
+        );
         return;
       }
 
       try {
-        const user = await signInAnonymously();
+        const user =
+          await signInAnonymously();
+
         currentRole = "coach";
 
         let roomCode;
@@ -1438,9 +1702,10 @@
         while (exists) {
           roomCode = makeRoomCode();
 
-          const snapshot = await database
-            .ref("rooms/" + roomCode)
-            .once("value");
+          const snapshot =
+            await database
+              .ref("rooms/" + roomCode)
+              .once("value");
 
           exists = snapshot.exists();
         }
@@ -1451,8 +1716,11 @@
           questionIds: [],
           currentQuestionIndex: -1,
           buzzedBy: null,
+          questionOpen: false,
+          questionStartedAt: 0,
           settings: settings,
-          createdAt: firebase.database.ServerValue.TIMESTAMP,
+          createdAt:
+            firebase.database.ServerValue.TIMESTAMP,
           players: {}
         };
 
@@ -1462,20 +1730,25 @@
           correct: 0,
           wrong: 0,
           limitOverride: false,
-          joinedAt: firebase.database.ServerValue.TIMESTAMP
+          joinedAt:
+            firebase.database.ServerValue.TIMESTAMP
         };
 
         await database
           .ref("rooms/" + roomCode)
           .set(room);
 
-        $("coachRoomCode").textContent = roomCode;
-        $("coachRoomArea").classList.remove("hidden");
+        $("coachRoomCode").textContent =
+          roomCode;
+
+        $("coachRoomArea")
+          .classList.remove("hidden");
 
         listenToRoom(roomCode);
       } catch (error) {
         showError(
-          "Could not create room: " + error.message
+          "Could not create room: " +
+          error.message
         );
       }
     }
@@ -1483,10 +1756,13 @@
     async function joinRoom() {
       clearError();
 
-      const name = $("studentName").value.trim();
-      const roomCode = $("roomCodeInput").value
-        .trim()
-        .toUpperCase();
+      const name =
+        $("studentName").value.trim();
+
+      const roomCode =
+        $("roomCodeInput").value
+          .trim()
+          .toUpperCase();
 
       if (!name) {
         showError("Please enter your name.");
@@ -1494,14 +1770,22 @@
       }
 
       if (!/^[A-Z0-9]{6}$/.test(roomCode)) {
-        showError("Room code must be 6 characters.");
+        showError(
+          "Room code must be 6 characters."
+        );
         return;
       }
 
       try {
-        const user = await signInAnonymously();
-        const roomReference = database.ref("rooms/" + roomCode);
-        const snapshot = await roomReference.once("value");
+        const user =
+          await signInAnonymously();
+
+        const roomReference =
+          database.ref("rooms/" + roomCode);
+
+        const snapshot =
+          await roomReference.once("value");
+
         const room = snapshot.val();
 
         if (!room) {
@@ -1510,7 +1794,9 @@
         }
 
         if (room.status !== "waiting") {
-          showError("Competition has already started.");
+          showError(
+            "Competition has already started."
+          );
           return;
         }
 
@@ -1525,16 +1811,21 @@
             correct: 0,
             wrong: 0,
             limitOverride: false,
-            joinedAt: firebase.database.ServerValue.TIMESTAMP
+            joinedAt:
+              firebase.database.ServerValue.TIMESTAMP
           });
 
-        $("studentRoomCode").textContent = roomCode;
-        $("studentRoomArea").classList.remove("hidden");
+        $("studentRoomCode").textContent =
+          roomCode;
+
+        $("studentRoomArea")
+          .classList.remove("hidden");
 
         listenToRoom(roomCode);
       } catch (error) {
         showError(
-          "Could not join room: " + error.message
+          "Could not join room: " +
+          error.message
         );
       }
     }
@@ -1551,14 +1842,18 @@
         const roomReference =
           database.ref("rooms/" + currentRoomCode);
 
-        const snapshot = await roomReference.once("value");
+        const snapshot =
+          await roomReference.once("value");
+
         const room = snapshot.val();
 
         const available =
           getQuestionsForSettings(room.settings);
 
         if (available.length === 0) {
-          showError("No questions match the settings.");
+          showError(
+            "No questions match the settings."
+          );
           return;
         }
 
@@ -1570,19 +1865,30 @@
         const selected =
           shuffle(available).slice(
             0,
-            Math.min(requested, available.length)
+            Math.min(
+              requested,
+              available.length
+            )
           );
 
         await roomReference.update({
           status: "started",
-          questionIds: selected.map(question => question.id),
+          questionIds:
+            selected.map(
+              question => question.id
+            ),
           currentQuestionIndex: 0,
           buzzedBy: null,
-          startedAt: firebase.database.ServerValue.TIMESTAMP
+          questionOpen: true,
+          questionStartedAt:
+            firebase.database.ServerValue.TIMESTAMP,
+          startedAt:
+            firebase.database.ServerValue.TIMESTAMP
         });
       } catch (error) {
         showError(
-          "Could not start competition: " + error.message
+          "Could not start competition: " +
+          error.message
         );
       }
     }
@@ -1596,7 +1902,9 @@
         const roomReference =
           database.ref("rooms/" + currentRoomCode);
 
-        const snapshot = await roomReference.once("value");
+        const snapshot =
+          await roomReference.once("value");
+
         const room = snapshot.val();
 
         const player =
@@ -1615,6 +1923,7 @@
 
         if (
           room.status !== "started" ||
+          room.questionOpen !== true ||
           room.buzzedBy ||
           reachedLimit
         ) {
@@ -1627,10 +1936,14 @@
             if (value === null) {
               return currentUser.uid;
             }
+
             return;
           });
       } catch (error) {
-        showError("Could not buzz in: " + error.message);
+        showError(
+          "Could not buzz in: " +
+          error.message
+        );
       }
     }
 
@@ -1642,9 +1955,13 @@
       const roomReference =
         database.ref("rooms/" + currentRoomCode);
 
-      const snapshot = await roomReference.once("value");
+      const snapshot =
+        await roomReference.once("value");
+
       const room = snapshot.val();
-      const uid = room && room.buzzedBy;
+
+      const uid =
+        room && room.buzzedBy;
 
       if (!uid || !room.players[uid]) {
         return;
@@ -1661,7 +1978,8 @@
             return player;
           }
 
-          const correct = Number(player.correct || 0);
+          const correct =
+            Number(player.correct || 0);
 
           if (
             correct < maxCorrect ||
@@ -1673,7 +1991,10 @@
           return player;
         });
 
-      await roomReference.child("buzzedBy").set(null);
+      await roomReference.update({
+        buzzedBy: null,
+        questionOpen: false
+      });
     }
 
     async function markWrong() {
@@ -1684,9 +2005,13 @@
       const roomReference =
         database.ref("rooms/" + currentRoomCode);
 
-      const snapshot = await roomReference.once("value");
+      const snapshot =
+        await roomReference.once("value");
+
       const room = snapshot.val();
-      const uid = room && room.buzzedBy;
+
+      const uid =
+        room && room.buzzedBy;
 
       if (!uid || !room.players[uid]) {
         return;
@@ -1696,9 +2021,14 @@
         .child("players")
         .child(uid)
         .child("wrong")
-        .transaction(value => Number(value || 0) + 1);
+        .transaction(value =>
+          Number(value || 0) + 1
+        );
 
-      await roomReference.child("buzzedBy").set(null);
+      await roomReference.update({
+        buzzedBy: null,
+        questionOpen: false
+      });
     }
 
     async function nextQuestion() {
@@ -1709,7 +2039,9 @@
       const roomReference =
         database.ref("rooms/" + currentRoomCode);
 
-      const snapshot = await roomReference.once("value");
+      const snapshot =
+        await roomReference.once("value");
+
       const room = snapshot.val();
 
       if (!room) {
@@ -1719,10 +2051,13 @@
       const nextIndex =
         Number(room.currentQuestionIndex) + 1;
 
-      if (nextIndex >= room.questionIds.length) {
+      if (
+        nextIndex >= room.questionIds.length
+      ) {
         await roomReference.update({
           status: "finished",
-          buzzedBy: null
+          buzzedBy: null,
+          questionOpen: false
         });
 
         return;
@@ -1730,7 +2065,10 @@
 
       await roomReference.update({
         currentQuestionIndex: nextIndex,
-        buzzedBy: null
+        buzzedBy: null,
+        questionOpen: true,
+        questionStartedAt:
+          firebase.database.ServerValue.TIMESTAMP
       });
     }
 
@@ -1748,7 +2086,9 @@
           .child("players")
           .child(uid);
 
-      const snapshot = await playerReference.once("value");
+      const snapshot =
+        await playerReference.once("value");
+
       const player = snapshot.val();
 
       if (!player) {
@@ -1756,8 +2096,31 @@
       }
 
       await playerReference.update({
-        limitOverride: player.limitOverride !== true
+        limitOverride:
+          player.limitOverride !== true
       });
+    }
+
+    async function toggleMicrophone() {
+      if (microphoneOn) {
+        await LiveKitMedia.turnMicrophoneOff();
+        microphoneOn = false;
+        updateMediaStatus();
+        return;
+      }
+
+      await turnMicrophoneOn();
+    }
+
+    async function toggleCamera() {
+      if (cameraOn) {
+        await LiveKitMedia.turnCameraOff();
+        cameraOn = false;
+        updateMediaStatus();
+        return;
+      }
+
+      await turnCameraOn();
     }
 
     async function turnMicrophoneOn() {
@@ -1774,7 +2137,7 @@
         const player =
           currentRoomData.players[currentUser.uid];
 
-        const playerName =
+        const name =
           player && player.name
             ? player.name
             : currentRole || "Participant";
@@ -1782,36 +2145,19 @@
         await LiveKitMedia.turnMicrophoneOn(
           "bq-" + currentRoomCode,
           "firebase-" + currentUser.uid,
-          playerName
+          name
         );
 
         microphoneOn = true;
         updateMediaStatus();
       } catch (error) {
         showError(
-          "Could not turn on microphone: " + error.message
+          "Could not turn on microphone: " +
+          error.message
         );
       }
     }
 
-    function turnMicrophoneOff() {
-      try {
-        LiveKitMedia.turnMicrophoneOff();
-        microphoneOn = false;
-        updateMediaStatus();
-      } catch (error) {
-        showError(
-          "Could not turn off microphone: " + error.message
-        );
-      }
-    }
-async function toggleMicrophone() {
-  if (microphoneOn) {
-    turnMicrophoneOff();
-  } else {
-    await turnMicrophoneOn();
-  }
-}
     async function turnCameraOn() {
       try {
         if (
@@ -1826,7 +2172,7 @@ async function toggleMicrophone() {
         const player =
           currentRoomData.players[currentUser.uid];
 
-        const playerName =
+        const name =
           player && player.name
             ? player.name
             : currentRole || "Participant";
@@ -1834,36 +2180,40 @@ async function toggleMicrophone() {
         await LiveKitMedia.turnCameraOn(
           "bq-" + currentRoomCode,
           "firebase-" + currentUser.uid,
-          playerName
+          name
         );
 
         cameraOn = true;
         updateMediaStatus();
       } catch (error) {
         showError(
-          "Could not turn on camera: " + error.message
+          "Could not turn on camera: " +
+          error.message
         );
       }
     }
 
-    function turnCameraOff() {
+    async function enableRemoteAudio() {
       try {
-        LiveKitMedia.turnCameraOff();
-        cameraOn = false;
-        updateMediaStatus();
+        await LiveKitMedia.startAudio();
+
+        if (
+          currentRole === "coach"
+        ) {
+          $("coachCompetitionStatus").textContent =
+            "Remote audio enabled.";
+        } else {
+          $("studentCompetitionStatus").textContent =
+            "Remote audio enabled.";
+        }
       } catch (error) {
         showError(
-          "Could not turn off camera: " + error.message
+          "Could not enable remote audio: " +
+          error.message
         );
       }
     }
-async function toggleCamera() {
-  if (cameraOn) {
-    turnCameraOff();
-  } else {
-    await turnCameraOn();
-  }
-}
+
     async function leaveRoom(role) {
       clearError();
 
@@ -1871,7 +2221,7 @@ async function toggleCamera() {
         window.LiveKitMedia &&
         LiveKitMedia.connected
       ) {
-        LiveKitMedia.disconnect();
+        await LiveKitMedia.disconnect();
       }
 
       microphoneOn = false;
@@ -1879,7 +2229,7 @@ async function toggleCamera() {
       updateMediaStatus();
 
       if (!currentRoomCode || !currentUser) {
-        showOnly(homeScreen);
+        showOnly($("homeScreen"));
         return;
       }
 
@@ -1902,10 +2252,11 @@ async function toggleCamera() {
         }
 
         resetLocalState();
-        showOnly(homeScreen);
+        showOnly($("homeScreen"));
       } catch (error) {
         showError(
-          "Could not leave room: " + error.message
+          "Could not leave room: " +
+          error.message
         );
       }
     }
@@ -1916,106 +2267,156 @@ async function toggleCamera() {
       currentRoomData = null;
       microphoneOn = false;
       cameraOn = false;
+      lastSpokenQuestionKey = "";
 
       $("coachRoomArea").classList.add("hidden");
       $("studentRoomArea").classList.add("hidden");
 
+      $("coachLivekitMediaContainer").innerHTML = "";
+      $("studentLivekitMediaContainer").innerHTML = "";
+
       updateMediaStatus();
     }
 
-    $("coachButton").addEventListener("click", () => {
-      clearError();
-      showOnly(coachScreen);
-    });
+    $("coachButton").addEventListener(
+      "click",
+      () => {
+        clearError();
+        showOnly($("coachScreen"));
+      }
+    );
 
-    $("studentButton").addEventListener("click", () => {
-      clearError();
-      showOnly(studentScreen);
-    });
+    $("studentButton").addEventListener(
+      "click",
+      () => {
+        clearError();
+        showOnly($("studentScreen"));
+      }
+    );
 
-    $("createRoomButton").addEventListener("click", createRoom);
-    $("joinRoomButton").addEventListener("click", joinRoom);
-    $("startCompetitionButton").addEventListener("click", startCompetition);
+    $("createRoomButton").addEventListener(
+      "click",
+      createRoom
+    );
 
-    $("studentBuzzButton").addEventListener("click", buzzIn);
+    $("joinRoomButton").addEventListener(
+      "click",
+      joinRoom
+    );
 
-    $("coachCorrectButton").addEventListener("click", markCorrect);
-    $("coachWrongButton").addEventListener("click", markWrong);
-    $("coachNextButton").addEventListener("click", nextQuestion);
+    $("startCompetitionButton").addEventListener(
+      "click",
+      startCompetition
+    );
 
-    document
-  .getElementById("coachMicButton")
-  .addEventListener(
-    "click",
-    toggleMicrophone
-  );
+    $("studentBuzzButton").addEventListener(
+      "click",
+      buzzIn
+    );
 
-document
-  .getElementById("coachCameraButton")
-  .addEventListener(
-    "click",
-    toggleCamera
-  );
+    $("coachCorrectButton").addEventListener(
+      "click",
+      markCorrect
+    );
 
-document
-  .getElementById("studentMicButton")
-  .addEventListener(
-    "click",
-    toggleMicrophone
-  );
+    $("coachWrongButton").addEventListener(
+      "click",
+      markWrong
+    );
 
-document
-  .getElementById("studentCameraButton")
-  .addEventListener(
-    "click",
-    toggleCamera
-  );
+    $("coachNextButton").addEventListener(
+      "click",
+      nextQuestion
+    );
 
-    $("leaveCoachButton").addEventListener("click", () => {
-      leaveRoom("coach");
-    });
+    $("coachMicButton").addEventListener(
+      "click",
+      toggleMicrophone
+    );
 
-    $("studentLeaveButton").addEventListener("click", () => {
-      leaveRoom("student");
-    });
+    $("studentMicButton").addEventListener(
+      "click",
+      toggleMicrophone
+    );
 
-    $("coachLeaveCompetitionButton").addEventListener("click", () => {
-      leaveRoom("coach");
-    });
+    $("coachCameraButton").addEventListener(
+      "click",
+      toggleCamera
+    );
 
-    $("studentLeaveCompetitionButton").addEventListener("click", () => {
-      leaveRoom("student");
-    });
+    $("studentCameraButton").addEventListener(
+      "click",
+      toggleCamera
+    );
 
-    $("coachBackButton").addEventListener("click", () => {
-      showOnly(homeScreen);
-    });
+    $("coachEnableAudioButton").addEventListener(
+      "click",
+      enableRemoteAudio
+    );
 
-    $("studentBackButton").addEventListener("click", () => {
-      showOnly(homeScreen);
-    });
+    $("studentEnableAudioButton").addEventListener(
+      "click",
+      enableRemoteAudio
+    );
 
-    $("coachStartChapter").addEventListener("change", () => {
-      populateVerses(
-        $("coachStartVerse"),
-        Number($("coachStartChapter").value),
-        1
-      );
+    $("leaveCoachButton").addEventListener(
+      "click",
+      () => leaveRoom("coach")
+    );
 
-      updateCoachPreview();
-    });
+    $("studentLeaveButton").addEventListener(
+      "click",
+      () => leaveRoom("student")
+    );
 
-    $("coachEndChapter").addEventListener("change", () => {
-      const chapter = Number($("coachEndChapter").value);
+    $("coachLeaveCompetitionButton").addEventListener(
+      "click",
+      () => leaveRoom("coach")
+    );
 
-      populateVerses(
-        $("coachEndVerse"),
-        chapter,
-        CHAPTER_VERSES[chapter]
-      );
+    $("studentLeaveCompetitionButton").addEventListener(
+      "click",
+      () => leaveRoom("student")
+    );
 
-      updateCoachPreview();
-    });
+    $("coachBackButton").addEventListener(
+      "click",
+      () => showOnly($("homeScreen"))
+    );
+
+    $("studentBackButton").addEventListener(
+      "click",
+      () => showOnly($("homeScreen"))
+    );
+
+    $("coachStartChapter").addEventListener(
+      "change",
+      () => {
+        populateVerses(
+          $("coachStartVerse"),
+          Number($("coachStartChapter").value),
+          1
+        );
+
+        updateCoachPreview();
+      }
+    );
+
+    $("coachEndChapter").addEventListener(
+      "change",
+      () => {
+        const chapter =
+          Number($("coachEndChapter").value);
+
+        populateVerses(
+          $("coachEndVerse"),
+          chapter,
+          CHAPTER_VERSES[chapter]
+        );
+
+        updateCoachPreview();
+      }
+    );
 
     $("coachStartVerse").addEventListener(
       "change",
@@ -2049,8 +2450,17 @@ document
     $("coachStartChapter").value = "1";
     $("coachEndChapter").value = "21";
 
-    populateVerses($("coachStartVerse"), 1, 1);
-    populateVerses($("coachEndVerse"), 21, 25);
+    populateVerses(
+      $("coachStartVerse"),
+      1,
+      1
+    );
+
+    populateVerses(
+      $("coachEndVerse"),
+      21,
+      25
+    );
 
     updateCoachPreview();
     updateMediaStatus();
