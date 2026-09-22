@@ -296,6 +296,19 @@
       font-size: 14px;
     }
 
+    .question-hidden-message {
+      padding: 22px;
+      margin: 16px 0;
+      border: 2px dashed var(--blue);
+      border-radius: 12px;
+      background: #f9fbff;
+      color: var(--blue);
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      line-height: 1.5;
+    }
+
     .buzzed-banner {
       padding: 15px;
       margin: 14px 0;
@@ -417,6 +430,7 @@
       </div>
     </header>
 
+    <!-- HOME -->
     <section id="homeScreen" class="card">
       <h2>Join or Create a Competition</h2>
 
@@ -429,6 +443,7 @@
       </button>
     </section>
 
+    <!-- COACH SETUP -->
     <section id="coachScreen" class="card hidden">
       <h2>Coach Setup</h2>
 
@@ -487,9 +502,11 @@
 
       <div id="coachRoomArea" class="hidden">
         <div id="coachStatus" class="status"></div>
+
         <div id="coachRoomCode" class="room-code"></div>
 
         <h3>Players</h3>
+
         <ul id="coachPlayerList" class="player-list"></ul>
 
         <button id="startCompetitionButton" class="green">
@@ -506,6 +523,7 @@
       </button>
     </section>
 
+    <!-- STUDENT LOBBY -->
     <section id="studentScreen" class="card hidden">
       <h2>Join Competition</h2>
 
@@ -533,9 +551,11 @@
 
       <div id="studentRoomArea" class="hidden">
         <div id="studentStatus" class="status"></div>
+
         <div id="studentRoomCode" class="room-code"></div>
 
         <h3>Players</h3>
+
         <ul id="studentPlayerList" class="player-list"></ul>
 
         <button id="studentLeaveButton" class="red">
@@ -548,6 +568,7 @@
       </button>
     </section>
 
+    <!-- COACH COMPETITION -->
     <section id="coachCompetitionScreen" class="card hidden">
       <h2>Coach Competition</h2>
 
@@ -560,6 +581,10 @@
       </div>
 
       <div id="coachBuzzedBanner" class="buzzed-banner hidden"></div>
+
+      <button id="coachShowQuestionButton" class="secondary">
+        Show Question to Students
+      </button>
 
       <div class="button-row">
         <button id="coachCorrectButton" class="green" disabled>
@@ -621,6 +646,7 @@
       </div>
     </section>
 
+    <!-- STUDENT COMPETITION -->
     <section id="studentCompetitionScreen" class="card hidden">
       <h2>Student Competition</h2>
 
@@ -630,6 +656,10 @@
         <div id="studentQuestionLabel" class="question-label"></div>
         <div id="studentQuestionText" class="question-text"></div>
         <div id="studentQuestionReference" class="question-reference"></div>
+      </div>
+
+      <div id="studentQuestionHiddenMessage" class="question-hidden-message">
+        Question is ready. Listen for the coach or wait for the coach to show the text.
       </div>
 
       <div id="studentBuzzedBanner" class="buzzed-banner hidden"></div>
@@ -686,6 +716,7 @@
     <div id="errorMessage" class="error hidden"></div>
   </main>
 
+  <!-- Firebase and LiveKit -->
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
@@ -695,6 +726,7 @@
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.21.0/dist/livekit-client.umd.min.js"></script>
   <script src="livekit-media.js"></script>
 
+  <!-- Question Bank -->
   <script src="questions-01.js"></script>
   <script src="questions-02.js"></script>
   <script src="questions-03.js"></script>
@@ -770,8 +802,7 @@
     let cameraOn = false;
     let lastSpokenQuestionKey = "";
 
-    const $ = id =>
-      document.getElementById(id);
+    const $ = id => document.getElementById(id);
 
     function showError(message) {
       $("errorMessage").textContent = message;
@@ -1010,8 +1041,7 @@
     }
 
     function updateCoachPreview() {
-      const settings =
-        getCoachSettings();
+      const settings = getCoachSettings();
 
       if (
         getPosition(
@@ -1272,6 +1302,8 @@
       ) {
         $("coachQuestionBox").classList.add("hidden");
         $("studentQuestionBox").classList.add("hidden");
+        $("studentQuestionHiddenMessage")
+          .classList.add("hidden");
         return;
       }
 
@@ -1297,31 +1329,50 @@
         (TYPE_NAMES[question.type] ||
           question.type);
 
+      /*
+        Coach always sees text.
+      */
       $("coachQuestionLabel").textContent = label;
-      $("studentQuestionLabel").textContent = label;
-
       $("coachQuestionText").textContent =
         question.question;
-
-      $("studentQuestionText").textContent =
-        question.question;
-
       $("coachQuestionReference").textContent =
         "Reference: " + question.reference;
-
-      $("studentQuestionReference").textContent =
-        "Reference: " + question.reference;
-
       $("coachQuestionBox").classList.remove("hidden");
-      $("studentQuestionBox").classList.remove("hidden");
 
-      speakQuestionForEveryone(
-        room,
-        question
-      );
+      /*
+        Students only see text after Coach clicks
+        Show Question to Students.
+      */
+      if (room.questionVisibleToStudents === true) {
+        $("studentQuestionLabel").textContent = label;
+        $("studentQuestionText").textContent =
+          question.question;
+        $("studentQuestionReference").textContent =
+          "Reference: " + question.reference;
+
+        $("studentQuestionBox")
+          .classList.remove("hidden");
+
+        $("studentQuestionHiddenMessage")
+          .classList.add("hidden");
+      } else {
+        $("studentQuestionBox")
+          .classList.add("hidden");
+
+        $("studentQuestionHiddenMessage")
+          .classList.remove("hidden");
+      }
+
+      /*
+        Only Coach automatically reads question.
+        iPad Safari may block automatic speech.
+      */
+      if (currentRole === "coach") {
+        speakQuestionForCoach(room, question);
+      }
     }
 
-    function speakQuestionForEveryone(room, question) {
+    function speakQuestionForCoach(room, question) {
       if (
         room.questionOpen !== true ||
         !question
@@ -1356,7 +1407,7 @@
         startAt > 0
           ? Math.max(
               0,
-              startAt + 1500 - Date.now()
+              startAt + 1000 - Date.now()
             )
           : 0;
 
@@ -1452,6 +1503,12 @@
       $("coachNextButton").disabled =
         currentRole !== "coach" ||
         room.status !== "started";
+
+      $("coachShowQuestionButton").disabled =
+        currentRole !== "coach" ||
+        room.status !== "started" ||
+        room.questionOpen !== true ||
+        room.questionVisibleToStudents === true;
     }
 
     function updateMediaStatus() {
@@ -1599,7 +1656,11 @@
 
         $("studentCompetitionStatus").textContent =
           room.questionOpen === true
-            ? "Question is open."
+            ? (
+              room.questionVisibleToStudents === true
+                ? "Question is open."
+                : "Question is open. Text is hidden until the coach shows it."
+            )
             : "Wait for Coach to start the next question.";
       }
 
@@ -1717,6 +1778,7 @@
           currentQuestionIndex: -1,
           buzzedBy: null,
           questionOpen: false,
+          questionVisibleToStudents: false,
           questionStartedAt: 0,
           settings: settings,
           createdAt:
@@ -1880,6 +1942,7 @@
           currentQuestionIndex: 0,
           buzzedBy: null,
           questionOpen: true,
+          questionVisibleToStudents: false,
           questionStartedAt:
             firebase.database.ServerValue.TIMESTAMP,
           startedAt:
@@ -1888,6 +1951,25 @@
       } catch (error) {
         showError(
           "Could not start competition: " +
+          error.message
+        );
+      }
+    }
+
+    async function showQuestionToStudents() {
+      if (!currentRoomCode) {
+        return;
+      }
+
+      try {
+        await database
+          .ref("rooms/" + currentRoomCode)
+          .update({
+            questionVisibleToStudents: true
+          });
+      } catch (error) {
+        showError(
+          "Could not show question: " +
           error.message
         );
       }
@@ -2057,7 +2139,8 @@
         await roomReference.update({
           status: "finished",
           buzzedBy: null,
-          questionOpen: false
+          questionOpen: false,
+          questionVisibleToStudents: false
         });
 
         return;
@@ -2067,6 +2150,7 @@
         currentQuestionIndex: nextIndex,
         buzzedBy: null,
         questionOpen: true,
+        questionVisibleToStudents: false,
         questionStartedAt:
           firebase.database.ServerValue.TIMESTAMP
       });
@@ -2197,9 +2281,7 @@
       try {
         await LiveKitMedia.startAudio();
 
-        if (
-          currentRole === "coach"
-        ) {
+        if (currentRole === "coach") {
           $("coachCompetitionStatus").textContent =
             "Remote audio enabled.";
         } else {
@@ -2307,6 +2389,11 @@
     $("startCompetitionButton").addEventListener(
       "click",
       startCompetition
+    );
+
+    $("coachShowQuestionButton").addEventListener(
+      "click",
+      showQuestionToStudents
     );
 
     $("studentBuzzButton").addEventListener(
