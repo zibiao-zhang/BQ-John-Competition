@@ -4,6 +4,14 @@ window.LiveKitMedia = {
   localTracks: [],
   connected: false,
   connectingPromise: null,
+  mediaContainer: null,
+
+  safeId(identity) {
+    return String(identity).replace(
+      /[^a-zA-Z0-9_-]/g,
+      "_"
+    );
+  },
 
   async connect(
     roomName,
@@ -50,12 +58,13 @@ window.LiveKitMedia = {
     }
 
     if (this.room) {
-      this.disconnect();
+      await this.disconnect();
     }
 
     let tokenSource;
 
     if (
+      LivekitClient.TokenSource &&
       typeof LivekitClient.TokenSource
         .developmentTokenServer === "function"
     ) {
@@ -64,12 +73,20 @@ window.LiveKitMedia = {
           .developmentTokenServer(
             window.LIVEKIT_CONFIG.tokenServerId
           );
-    } else {
+    } else if (
+      LivekitClient.TokenSource &&
+      typeof LivekitClient.TokenSource
+        .sandboxTokenServer === "function"
+    ) {
       tokenSource =
         LivekitClient.TokenSource
           .sandboxTokenServer(
             window.LIVEKIT_CONFIG.tokenServerId
           );
+    } else {
+      throw new Error(
+        "No compatible LiveKit token server was found."
+      );
     }
 
     const tokenResult =
@@ -79,11 +96,19 @@ window.LiveKitMedia = {
         participantName: participantName
       });
 
+    /*
+      Force H.264 video for iPad / Safari compatibility.
+    */
     const room =
       new LivekitClient.Room({
         adaptiveStream: false,
         dynacast: false,
-        autoSubscribe: true
+        autoSubscribe: true,
+
+        publishDefaults: {
+          videoCodec: "h264",
+          simulcast: false
+        }
       });
 
     room.on(
@@ -100,11 +125,17 @@ window.LiveKitMedia = {
       LivekitClient.RoomEvent.TrackUnsubscribed,
       track => {
         try {
-          track.detach().forEach(element => {
+          const elements =
+            track.detach();
+
+          elements.forEach(element => {
             element.remove();
           });
         } catch (error) {
-          console.warn(error);
+          console.warn(
+            "Could not detach remote track:",
+            error
+          );
         }
       }
     );
@@ -138,6 +169,7 @@ window.LiveKitMedia = {
     console.log(
       "LiveKit connected:",
       roomName,
+      "as:",
       room.localParticipant.identity
     );
 
@@ -146,8 +178,13 @@ window.LiveKitMedia = {
     return room;
   },
 
+  setMediaContainer(container) {
+    this.mediaContainer = container;
+    this.renderExistingRemoteTracks();
+  },
+
   renderExistingRemoteTracks() {
-    if (!this.room) {
+    if (!this.room || !this.mediaContainer) {
       return;
     }
 
@@ -167,60 +204,24 @@ window.LiveKitMedia = {
     );
   },
 
-  getMediaContainer() {
-    const coachScreen =
-      document.getElementById(
-        "coachCompetitionScreen"
-      );
-
-    const studentScreen =
-      document.getElementById(
-        "studentCompetitionScreen"
-      );
-
-    if (
-      coachScreen &&
-      !coachScreen.classList.contains("hidden")
-    ) {
-      return document.getElementById(
-        "coachLivekitMediaContainer"
-      );
-    }
-
-    if (
-      studentScreen &&
-      !studentScreen.classList.contains("hidden")
-    ) {
-      return document.getElementById(
-        "studentLivekitMediaContainer"
-      );
-    }
-
-    return null;
-  },
-
   getParticipantBox(identity, name) {
-    const container =
-      this.getMediaContainer();
-
-    if (!container) {
+    if (!this.mediaContainer) {
       return null;
     }
 
+    const boxId =
+      "livekit-participant-" +
+      this.safeId(identity);
+
     let box =
-      document.getElementById(
-        "livekit-participant-" + identity
-      );
+      document.getElementById(boxId);
 
     if (!box) {
       box =
         document.createElement("div");
 
-      box.id =
-        "livekit-participant-" + identity;
-
-      box.className =
-        "livekit-participant";
+      box.id = boxId;
+      box.className = "livekit-participant";
 
       const title =
         document.createElement("div");
@@ -232,7 +233,7 @@ window.LiveKitMedia = {
         name || identity;
 
       box.appendChild(title);
-      container.appendChild(box);
+      this.mediaContainer.appendChild(box);
     }
 
     return box;
@@ -249,15 +250,15 @@ window.LiveKitMedia = {
       return;
     }
 
-    const oldElement =
+    const existing =
       box.querySelector(
         '[data-track-kind="' +
         track.kind +
         '"]'
       );
 
-    if (oldElement) {
-      oldElement.remove();
+    if (existing) {
+      existing.remove();
     }
 
     const element =
@@ -273,16 +274,18 @@ window.LiveKitMedia = {
       element.className =
         "livekit-video";
 
-      /*
-        Important for iPhone Safari:
-        inline playback and muted video autoplay.
-        Audio is received through a separate audio element.
-      */
       element.autoplay = true;
       element.muted = true;
       element.playsInline = true;
-      element.setAttribute("playsinline", "");
-      element.setAttribute("webkit-playsinline", "");
+      element.setAttribute(
+        "playsinline",
+        ""
+      );
+
+      element.setAttribute(
+        "webkit-playsinline",
+        ""
+      );
     }
 
     if (track.kind === "audio") {
@@ -296,16 +299,23 @@ window.LiveKitMedia = {
     box.appendChild(element);
 
     requestAnimationFrame(() => {
-      element.play().catch(error => {
-        console.warn(
-          "Remote media playback needs user interaction:",
-          error
+      element.play().catch(() => {
+        console.log(
+          "Remote media may need Enable Remote Audio."
         );
       });
     });
   },
 
   attachLocalPreview(track) {
+    /*
+      Only show local CAMERA preview.
+      Do not add local audio preview.
+    */
+    if (track.kind !== "video") {
+      return;
+    }
+
     const box =
       this.getParticipantBox(
         "local-preview",
@@ -316,15 +326,15 @@ window.LiveKitMedia = {
       return;
     }
 
-    const oldElement =
+    const existing =
       box.querySelector(
         '[data-track-kind="' +
         track.kind +
         '"]'
       );
 
-    if (oldElement) {
-      oldElement.remove();
+    if (existing) {
+      existing.remove();
     }
 
     const element =
@@ -333,21 +343,19 @@ window.LiveKitMedia = {
     element.dataset.trackKind =
       track.kind;
 
-    if (track.kind === "video") {
-      element.className =
-        "livekit-video";
-      element.autoplay = true;
-      element.muted = true;
-      element.playsInline = true;
-      element.setAttribute("playsinline", "");
-    }
+    element.dataset.participantIdentity =
+      "local-preview";
 
-    if (track.kind === "audio") {
-      element.className =
-        "livekit-audio";
-      element.autoplay = true;
-      element.muted = true;
-    }
+    element.className =
+      "livekit-video";
+
+    element.autoplay = true;
+    element.muted = true;
+    element.playsInline = true;
+    element.setAttribute(
+      "playsinline",
+      ""
+    );
 
     box.appendChild(element);
   },
@@ -355,12 +363,17 @@ window.LiveKitMedia = {
   removeParticipant(identity) {
     const box =
       document.getElementById(
-        "livekit-participant-" + identity
+        "livekit-participant-" +
+        this.safeId(identity)
       );
 
     if (box) {
       box.remove();
     }
+  },
+
+  removeLocalPreview() {
+    this.removeParticipant("local-preview");
   },
 
   hasAudioTrack() {
@@ -373,6 +386,21 @@ window.LiveKitMedia = {
     return this.localTracks.some(
       track => track.kind === "video"
     );
+  },
+
+  async startAudio() {
+    if (
+      this.room &&
+      typeof this.room.startAudio === "function"
+    ) {
+      await this.room.startAudio();
+    }
+
+    document
+      .querySelectorAll(".livekit-audio")
+      .forEach(audio => {
+        audio.play().catch(() => {});
+      });
   },
 
   async turnMicrophoneOn(
@@ -398,35 +426,44 @@ window.LiveKitMedia = {
 
     for (const track of tracks) {
       await this.room.localParticipant
-        .publishTrack(track);
+        .publishTrack(track, {
+          source: LivekitClient.Track.Source.Microphone
+        });
 
       this.localTracks.push(track);
-      this.attachLocalPreview(track);
     }
+
+    console.log("Microphone turned on.");
   },
 
-  turnMicrophoneOff() {
-    const tracks =
+  async turnMicrophoneOff() {
+    const audioTracks =
       this.localTracks.filter(
         track => track.kind === "audio"
       );
 
-    tracks.forEach(track => {
+    for (const track of audioTracks) {
       try {
-        this.room.localParticipant
+        await this.room.localParticipant
           .unpublishTrack(track);
       } catch (error) {
         console.warn(error);
       }
 
-      track.detach();
-      track.stop();
-    });
+      try {
+        track.detach();
+        track.stop();
+      } catch (error) {
+        console.warn(error);
+      }
+    }
 
     this.localTracks =
       this.localTracks.filter(
         track => track.kind !== "audio"
       );
+
+    console.log("Microphone turned off.");
   },
 
   async turnCameraOn(
@@ -451,41 +488,58 @@ window.LiveKitMedia = {
       });
 
     for (const track of tracks) {
+      /*
+        Force H.264 for iPad / Safari.
+      */
       await this.room.localParticipant
-        .publishTrack(track);
+        .publishTrack(track, {
+          source: LivekitClient.Track.Source.Camera,
+          videoCodec: "h264",
+          simulcast: false
+        });
 
       this.localTracks.push(track);
       this.attachLocalPreview(track);
     }
+
+    console.log("Camera turned on with H264.");
   },
 
-  turnCameraOff() {
-    const tracks =
+  async turnCameraOff() {
+    const videoTracks =
       this.localTracks.filter(
         track => track.kind === "video"
       );
 
-    tracks.forEach(track => {
+    for (const track of videoTracks) {
       try {
-        this.room.localParticipant
+        await this.room.localParticipant
           .unpublishTrack(track);
       } catch (error) {
         console.warn(error);
       }
 
-      track.detach();
-      track.stop();
-    });
+      try {
+        track.detach();
+        track.stop();
+      } catch (error) {
+        console.warn(error);
+      }
+    }
 
     this.localTracks =
       this.localTracks.filter(
         track => track.kind !== "video"
       );
+
+    this.removeLocalPreview();
+
+    console.log("Camera turned off.");
   },
 
-  disconnect() {
-    this.turnMicrophoneOff();
-    this.turnCameraOff();
+  async disconnect() {
+    await this.turnMicrophoneOff();
+    await this.turnCameraOff();
 
     if (this.room) {
       this.room.disconnect();
@@ -494,11 +548,15 @@ window.LiveKitMedia = {
     this.room = null;
     this.roomName = null;
     this.connected = false;
+    this.connectingPromise = null;
+    this.mediaContainer = null;
 
     document
       .querySelectorAll(".livekit-participant")
       .forEach(element => {
         element.remove();
       });
+
+    console.log("Disconnected from LiveKit.");
   }
 };
