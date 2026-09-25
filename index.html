@@ -15,6 +15,8 @@
       --light-green: #effcf5;
       --red: #b42318;
       --light-red: #fff1f0;
+      --orange: #b54708;
+      --light-orange: #fff4e5;
       --gray: #667085;
       --dark: #17202a;
       --border: #d0d5dd;
@@ -296,6 +298,28 @@
       font-size: 14px;
     }
 
+    .coach-answer-box {
+      margin-top: 18px;
+      padding: 14px;
+      border-left: 5px solid var(--green);
+      border-radius: 8px;
+      background: var(--light-green);
+    }
+
+    .coach-answer-label {
+      margin-bottom: 8px;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .coach-answer-text {
+      font-size: 18px;
+      font-weight: bold;
+      line-height: 1.45;
+    }
+
     .question-hidden-message {
       padding: 22px;
       margin: 16px 0;
@@ -318,6 +342,42 @@
       font-size: 20px;
       font-weight: bold;
       text-align: center;
+    }
+
+    .timer-box {
+      margin: 16px 0;
+      padding: 16px;
+      border-radius: 12px;
+      background: var(--light-blue);
+      color: var(--blue);
+      text-align: center;
+    }
+
+    .timer-label {
+      font-size: 13px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .timer-value {
+      margin-top: 4px;
+      font-size: 42px;
+      font-weight: bold;
+    }
+
+    .timer-box.warning {
+      background: var(--light-orange);
+      color: var(--orange);
+    }
+
+    .timer-box.danger {
+      background: var(--light-red);
+      color: var(--red);
+    }
+
+    .timer-box.expired {
+      background: var(--light-red);
+      color: var(--red);
     }
 
     .button-row {
@@ -430,7 +490,6 @@
       </div>
     </header>
 
-    <!-- HOME -->
     <section id="homeScreen" class="card">
       <h2>Join or Create a Competition</h2>
 
@@ -443,9 +502,8 @@
       </button>
     </section>
 
-    <!-- COACH SETUP -->
     <section id="coachScreen" class="card hidden">
-      <h2>Coach Setup</h2>
+      <h2 id="coachSetupTitle">Coach Setup</h2>
 
       <label>Start Reference</label>
 
@@ -462,7 +520,6 @@
       </div>
 
       <label>Question Types</label>
-
       <div id="coachTypeGrid" class="type-grid"></div>
 
       <label for="coachQuestionCount">
@@ -485,13 +542,26 @@
       </label>
 
       <select id="maxCorrectSelect">
-        <option value="4">4</option>
+        <option value="4" selected>4</option>
         <option value="5">5</option>
         <option value="6">6</option>
         <option value="7">7</option>
         <option value="8">8</option>
         <option value="9">9</option>
-        <option value="10" selected>10</option>
+        <option value="10">10</option>
+      </select>
+
+      <label for="answerTimeLimitSelect">
+        Answer Time Limit
+      </label>
+
+      <select id="answerTimeLimitSelect">
+        <option value="10">10 seconds</option>
+        <option value="15">15 seconds</option>
+        <option value="20">20 seconds</option>
+        <option value="30" selected>30 seconds</option>
+        <option value="45">45 seconds</option>
+        <option value="60">60 seconds</option>
       </select>
 
       <div id="coachSetupPreview" class="status"></div>
@@ -502,11 +572,9 @@
 
       <div id="coachRoomArea" class="hidden">
         <div id="coachStatus" class="status"></div>
-
         <div id="coachRoomCode" class="room-code"></div>
 
         <h3>Players</h3>
-
         <ul id="coachPlayerList" class="player-list"></ul>
 
         <button id="startCompetitionButton" class="green">
@@ -523,12 +591,10 @@
       </button>
     </section>
 
-    <!-- STUDENT LOBBY -->
     <section id="studentScreen" class="card hidden">
       <h2>Join Competition</h2>
 
       <label for="studentName">Your Name</label>
-
       <input
         id="studentName"
         type="text"
@@ -537,7 +603,6 @@
       >
 
       <label for="roomCodeInput">Room Code</label>
-
       <input
         id="roomCodeInput"
         type="text"
@@ -551,11 +616,9 @@
 
       <div id="studentRoomArea" class="hidden">
         <div id="studentStatus" class="status"></div>
-
         <div id="studentRoomCode" class="room-code"></div>
 
         <h3>Players</h3>
-
         <ul id="studentPlayerList" class="player-list"></ul>
 
         <button id="studentLeaveButton" class="red">
@@ -568,7 +631,6 @@
       </button>
     </section>
 
-    <!-- COACH COMPETITION -->
     <section id="coachCompetitionScreen" class="card hidden">
       <h2>Coach Competition</h2>
 
@@ -578,9 +640,27 @@
         <div id="coachQuestionLabel" class="question-label"></div>
         <div id="coachQuestionText" class="question-text"></div>
         <div id="coachQuestionReference" class="question-reference"></div>
+
+        <div class="coach-answer-box">
+          <div class="coach-answer-label">
+            Correct Answer
+          </div>
+
+          <div id="coachAnswerText" class="coach-answer-text"></div>
+        </div>
       </div>
 
       <div id="coachBuzzedBanner" class="buzzed-banner hidden"></div>
+
+      <div id="coachTimerBox" class="timer-box hidden">
+        <div class="timer-label">
+          Answer Time Remaining
+        </div>
+
+        <div id="coachTimerValue" class="timer-value">
+          30
+        </div>
+      </div>
 
       <button id="coachShowQuestionButton" class="secondary">
         Show Question to Students
@@ -598,6 +678,10 @@
 
       <button id="coachNextButton" class="primary" disabled>
         Next Question
+      </button>
+
+      <button id="coachNewRoundButton" class="green hidden">
+        New Round Setup
       </button>
 
       <div class="button-row">
@@ -646,7 +730,6 @@
       </div>
     </section>
 
-    <!-- STUDENT COMPETITION -->
     <section id="studentCompetitionScreen" class="card hidden">
       <h2>Student Competition</h2>
 
@@ -663,6 +746,16 @@
       </div>
 
       <div id="studentBuzzedBanner" class="buzzed-banner hidden"></div>
+
+      <div id="studentTimerBox" class="timer-box hidden">
+        <div class="timer-label">
+          Answer Time Remaining
+        </div>
+
+        <div id="studentTimerValue" class="timer-value">
+          30
+        </div>
+      </div>
 
       <button id="studentBuzzButton" class="primary" disabled>
         Buzz In
@@ -716,11 +809,12 @@
     <div id="errorMessage" class="error hidden"></div>
   </main>
 
-  <!-- Firebase and LiveKit -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
 
+  <!-- Configuration and LiveKit -->
   <script src="firebase-config.js"></script>
   <script src="livekit-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.21.0/dist/livekit-client.umd.min.js"></script>
@@ -801,8 +895,12 @@
     let microphoneOn = false;
     let cameraOn = false;
     let lastSpokenQuestionKey = "";
+    let roundSetupMode = false;
+    let serverTimeOffset = 0;
+    let timerInterval = null;
 
-    const $ = id => document.getElementById(id);
+    const $ = id =>
+      document.getElementById(id);
 
     function showError(message) {
       $("errorMessage").textContent = message;
@@ -871,7 +969,8 @@
     }
 
     function getPosition(chapter, verse) {
-      return chapter * 1000 + verse;
+      return Number(chapter) * 1000 +
+        Number(verse);
     }
 
     function getQuestionById(id) {
@@ -1006,8 +1105,58 @@
               ),
 
         maxCorrect:
-          Number($("maxCorrectSelect").value)
+          Number($("maxCorrectSelect").value),
+
+        answerTimeLimit:
+          Number($("answerTimeLimitSelect").value)
       };
+    }
+
+    function applySettingsToForm(settings) {
+      if (!settings) {
+        return;
+      }
+
+      $("coachStartChapter").value =
+        String(settings.startChapter);
+
+      $("coachEndChapter").value =
+        String(settings.endChapter);
+
+      populateVerses(
+        $("coachStartVerse"),
+        Number(settings.startChapter),
+        Number(settings.startVerse)
+      );
+
+      populateVerses(
+        $("coachEndVerse"),
+        Number(settings.endChapter),
+        Number(settings.endVerse)
+      );
+
+      $("coachQuestionCount").value =
+        String(settings.questionCount);
+
+      $("maxCorrectSelect").value =
+        String(settings.maxCorrect || 4);
+
+      $("answerTimeLimitSelect").value =
+        String(settings.answerTimeLimit || 30);
+
+      document
+        .querySelectorAll(
+          'input[name="coachType"]'
+        )
+        .forEach(input => {
+          input.checked =
+            Array.isArray(settings.questionTypes) &&
+            settings.questionTypes.includes(
+              input.value
+            );
+        });
+
+      updateCoachPreview();
     }
 
     function getQuestionsForSettings(settings) {
@@ -1078,9 +1227,11 @@
         settings.endVerse +
         ". Available questions: " +
         available +
-        ". Max correct per student: " +
+        ". Max correct: " +
         settings.maxCorrect +
-        ".";
+        ". Answer time: " +
+        settings.answerTimeLimit +
+        " seconds.";
     }
 
     function renderPlayers(listElement, players) {
@@ -1118,7 +1269,7 @@
               ? Number(
                   currentRoomData.settings.maxCorrect
                 )
-              : 10;
+              : 4;
 
           const correct =
             Number(player.correct || 0);
@@ -1137,7 +1288,6 @@
             document.createElement("span");
 
           role.className = "player-role";
-
           role.textContent =
             player.role === "coach"
               ? "Coach"
@@ -1147,7 +1297,6 @@
             document.createElement("span");
 
           score.className = "player-score";
-
           score.textContent =
             "Correct: " +
             correct +
@@ -1329,44 +1478,49 @@
         (TYPE_NAMES[question.type] ||
           question.type);
 
-      /*
-        Coach always sees text.
-      */
-      $("coachQuestionLabel").textContent = label;
+      $("coachQuestionLabel").textContent =
+        label;
+
       $("coachQuestionText").textContent =
         question.question;
-      $("coachQuestionReference").textContent =
-        "Reference: " + question.reference;
-      $("coachQuestionBox").classList.remove("hidden");
 
-      /*
-        Students only see text after Coach clicks
-        Show Question to Students.
-      */
+      $("coachQuestionReference").textContent =
+        "Reference: " +
+        question.reference;
+
+      $("coachAnswerText").textContent =
+        question.answer || "";
+
+      $("coachQuestionBox").classList.remove(
+        "hidden"
+      );
+
       if (room.questionVisibleToStudents === true) {
-        $("studentQuestionLabel").textContent = label;
+        $("studentQuestionLabel").textContent =
+          label;
+
         $("studentQuestionText").textContent =
           question.question;
-        $("studentQuestionReference").textContent =
-          "Reference: " + question.reference;
 
-        $("studentQuestionBox")
-          .classList.remove("hidden");
+        $("studentQuestionReference").textContent =
+          "Reference: " +
+          question.reference;
+
+        $("studentQuestionBox").classList.remove(
+          "hidden"
+        );
 
         $("studentQuestionHiddenMessage")
           .classList.add("hidden");
       } else {
-        $("studentQuestionBox")
-          .classList.add("hidden");
+        $("studentQuestionBox").classList.add(
+          "hidden"
+        );
 
         $("studentQuestionHiddenMessage")
           .classList.remove("hidden");
       }
 
-      /*
-        Only Coach automatically reads question.
-        iPad Safari may block automatic speech.
-      */
       if (currentRole === "coach") {
         speakQuestionForCoach(room, question);
       }
@@ -1407,7 +1561,7 @@
         startAt > 0
           ? Math.max(
               0,
-              startAt + 1000 - Date.now()
+              startAt + 1000 - getServerNow()
             )
           : 0;
 
@@ -1429,8 +1583,14 @@
 
     function renderBuzz(room) {
       if (!room.buzzedBy) {
-        $("coachBuzzedBanner").classList.add("hidden");
-        $("studentBuzzedBanner").classList.add("hidden");
+        $("coachBuzzedBanner").classList.add(
+          "hidden"
+        );
+
+        $("studentBuzzedBanner").classList.add(
+          "hidden"
+        );
+
         return;
       }
 
@@ -1449,8 +1609,125 @@
       $("studentBuzzedBanner").textContent =
         name + " is answering.";
 
-      $("coachBuzzedBanner").classList.remove("hidden");
-      $("studentBuzzedBanner").classList.remove("hidden");
+      $("coachBuzzedBanner").classList.remove(
+        "hidden"
+      );
+
+      $("studentBuzzedBanner").classList.remove(
+        "hidden"
+      );
+    }
+
+    function getServerNow() {
+      return Date.now() + serverTimeOffset;
+    }
+
+    function setTimerBox(
+      box,
+      valueElement,
+      remaining,
+      expired
+    ) {
+      box.classList.remove(
+        "warning",
+        "danger",
+        "expired"
+      );
+
+      if (expired) {
+        valueElement.textContent =
+          "Time Expired";
+
+        box.classList.add("expired");
+        return;
+      }
+
+      valueElement.textContent =
+        Math.max(0, Math.ceil(remaining / 1000));
+
+      if (remaining <= 5000) {
+        box.classList.add("danger");
+      } else if (remaining <= 10000) {
+        box.classList.add("warning");
+      }
+    }
+
+    function updateTimer() {
+      const room = currentRoomData;
+
+      if (
+        !room ||
+        !room.buzzedBy ||
+        !room.buzzStartedAt ||
+        room.questionOpen !== true
+      ) {
+        $("coachTimerBox").classList.add("hidden");
+        $("studentTimerBox").classList.add("hidden");
+        return;
+      }
+
+      const limitSeconds =
+        Number(
+          room.settings.answerTimeLimit || 30
+        );
+
+      const expiresAt =
+        Number(room.buzzStartedAt) +
+        (limitSeconds * 1000);
+
+      const remaining =
+        expiresAt - getServerNow();
+
+      const expired =
+        remaining <= 0;
+
+      $("coachTimerBox").classList.remove("hidden");
+      $("studentTimerBox").classList.remove("hidden");
+
+      setTimerBox(
+        $("coachTimerBox"),
+        $("coachTimerValue"),
+        remaining,
+        expired
+      );
+
+      setTimerBox(
+        $("studentTimerBox"),
+        $("studentTimerValue"),
+        remaining,
+        expired
+      );
+
+      if (expired) {
+        $("coachCompetitionStatus").textContent =
+          "Time Expired. Coach must decide Correct, Wrong, or Next Question.";
+
+        $("studentCompetitionStatus").textContent =
+          "Time Expired. Wait for the coach.";
+      }
+    }
+
+    function startTimerDisplay() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+
+      timerInterval = setInterval(
+        updateTimer,
+        250
+      );
+
+      updateTimer();
+    }
+
+    function stopTimerDisplay() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+
+      $("coachTimerBox").classList.add("hidden");
+      $("studentTimerBox").classList.add("hidden");
     }
 
     function updateButtons(room) {
@@ -1509,6 +1786,17 @@
         room.status !== "started" ||
         room.questionOpen !== true ||
         room.questionVisibleToStudents === true;
+
+      if (
+        currentRole === "coach" &&
+        room.status === "finished"
+      ) {
+        $("coachNewRoundButton")
+          .classList.remove("hidden");
+      } else {
+        $("coachNewRoundButton")
+          .classList.add("hidden");
+      }
     }
 
     function updateMediaStatus() {
@@ -1623,21 +1911,43 @@
       );
 
       if (currentRole === "coach") {
-        showOnly(
-          room.status === "started" ||
-          room.status === "finished"
-            ? $("coachCompetitionScreen")
-            : $("coachScreen")
-        );
+        if (room.status === "round_setup") {
+          showOnly($("coachScreen"));
+          $("coachRoomArea").classList.add("hidden");
+          $("coachSetupTitle").textContent =
+            "New Round Setup";
+          $("createRoomButton").textContent =
+            "Start New Round";
+          roundSetupMode = true;
+        } else {
+          roundSetupMode = false;
+          $("coachSetupTitle").textContent =
+            "Coach Setup";
+          $("createRoomButton").textContent =
+            "Create New Room";
+
+          showOnly(
+            room.status === "started" ||
+            room.status === "finished"
+              ? $("coachCompetitionScreen")
+              : $("coachScreen")
+          );
+        }
       }
 
       if (currentRole === "student") {
-        showOnly(
-          room.status === "started" ||
-          room.status === "finished"
-            ? $("studentCompetitionScreen")
-            : $("studentScreen")
-        );
+        if (room.status === "round_setup") {
+          showOnly($("studentCompetitionScreen"));
+          $("studentCompetitionStatus").textContent =
+            "Round finished. Waiting for coach to set up the next round.";
+        } else {
+          showOnly(
+            room.status === "started" ||
+            room.status === "finished"
+              ? $("studentCompetitionScreen")
+              : $("studentScreen")
+          );
+        }
       }
 
       if (room.status === "waiting") {
@@ -1659,23 +1969,24 @@
             ? (
               room.questionVisibleToStudents === true
                 ? "Question is open."
-                : "Question is open. Text is hidden until the coach shows it."
+                : "Question is open. Text is hidden until coach shows it."
             )
             : "Wait for Coach to start the next question.";
       }
 
       if (room.status === "finished") {
         $("coachCompetitionStatus").textContent =
-          "Competition finished.";
+          "Competition finished. Click New Round Setup or Leave Room.";
 
         $("studentCompetitionStatus").textContent =
-          "Competition finished.";
+          "Round finished. Waiting for coach.";
       }
 
       renderQuestion(room);
       renderBuzz(room);
       updateButtons(room);
       updateMediaStatus();
+      updateTimer();
 
       if (
         room.status === "started" ||
@@ -1718,6 +2029,11 @@
 
     async function createRoom() {
       clearError();
+
+      if (roundSetupMode) {
+        await startNewRound();
+        return;
+      }
 
       const settings = getCoachSettings();
 
@@ -1777,6 +2093,7 @@
           questionIds: [],
           currentQuestionIndex: -1,
           buzzedBy: null,
+          buzzStartedAt: null,
           questionOpen: false,
           questionVisibleToStudents: false,
           questionStartedAt: 0,
@@ -1900,10 +2217,10 @@
         return;
       }
 
-      try {
-        const roomReference =
-          database.ref("rooms/" + currentRoomCode);
+      const roomReference =
+        database.ref("rooms/" + currentRoomCode);
 
+      try {
         const snapshot =
           await roomReference.once("value");
 
@@ -1925,13 +2242,14 @@
             : Number(room.settings.questionCount);
 
         const selected =
-          shuffle(available).slice(
-            0,
-            Math.min(
-              requested,
-              available.length
-            )
-          );
+          shuffle(available)
+            .slice(
+              0,
+              Math.min(
+                requested,
+                available.length
+              )
+            );
 
         await roomReference.update({
           status: "started",
@@ -1941,6 +2259,7 @@
             ),
           currentQuestionIndex: 0,
           buzzedBy: null,
+          buzzStartedAt: null,
           questionOpen: true,
           questionVisibleToStudents: false,
           questionStartedAt:
@@ -1951,6 +2270,157 @@
       } catch (error) {
         showError(
           "Could not start competition: " +
+          error.message
+        );
+      }
+    }
+
+    async function openNewRoundSetup() {
+      if (!currentRoomCode) {
+        return;
+      }
+
+      try {
+        clearError();
+
+        const roomReference =
+          database.ref("rooms/" + currentRoomCode);
+
+        const snapshot =
+          await roomReference.once("value");
+
+        const room = snapshot.val();
+
+        if (!room) {
+          showError("Room no longer exists.");
+          return;
+        }
+
+        applySettingsToForm(room.settings);
+
+        roundSetupMode = true;
+
+        await roomReference.update({
+          status: "round_setup",
+          buzzedBy: null,
+          buzzStartedAt: null,
+          questionOpen: false,
+          questionVisibleToStudents: false
+        });
+      } catch (error) {
+        showError(
+          "Could not open New Round Setup: " +
+          error.message
+        );
+      }
+    }
+
+    async function startNewRound() {
+      if (!currentRoomCode) {
+        return;
+      }
+
+      clearError();
+
+      const settings = getCoachSettings();
+
+      if (
+        getPosition(
+          settings.startChapter,
+          settings.startVerse
+        ) >
+        getPosition(
+          settings.endChapter,
+          settings.endVerse
+        )
+      ) {
+        showError("Invalid reference range.");
+        return;
+      }
+
+      if (settings.questionTypes.length === 0) {
+        showError(
+          "Select at least one question type."
+        );
+        return;
+      }
+
+      const available =
+        getQuestionsForSettings(settings);
+
+      if (available.length === 0) {
+        showError(
+          "No questions match these round settings."
+        );
+        return;
+      }
+
+      try {
+        const roomReference =
+          database.ref("rooms/" + currentRoomCode);
+
+        const snapshot =
+          await roomReference.once("value");
+
+        const room = snapshot.val();
+
+        const requested =
+          settings.questionCount === "all"
+            ? available.length
+            : Number(settings.questionCount);
+
+        const selected =
+          shuffle(available)
+            .slice(
+              0,
+              Math.min(
+                requested,
+                available.length
+              )
+            );
+
+        const updates = {
+          status: "started",
+          settings: settings,
+          questionIds:
+            selected.map(
+              question => question.id
+            ),
+          currentQuestionIndex: 0,
+          buzzedBy: null,
+          buzzStartedAt: null,
+          questionOpen: true,
+          questionVisibleToStudents: false,
+          questionStartedAt:
+            firebase.database.ServerValue.TIMESTAMP,
+          startedAt:
+            firebase.database.ServerValue.TIMESTAMP
+        };
+
+        Object.entries(
+          room.players || {}
+        ).forEach(([uid, player]) => {
+          if (player.role === "student") {
+            updates[
+              "players/" + uid + "/correct"
+            ] = 0;
+
+            updates[
+              "players/" + uid + "/wrong"
+            ] = 0;
+
+            updates[
+              "players/" + uid + "/limitOverride"
+            ] = false;
+          }
+        });
+
+        await roomReference.update(updates);
+
+        roundSetupMode = false;
+      } catch (error) {
+        showError(
+          "Could not start New Round: " +
           error.message
         );
       }
@@ -2012,15 +2482,26 @@
           return;
         }
 
-        await roomReference
-          .child("buzzedBy")
-          .transaction(value => {
-            if (value === null) {
-              return currentUser.uid;
-            }
+        const buzzResult =
+          await roomReference
+            .child("buzzedBy")
+            .transaction(value => {
+              if (value === null) {
+                return currentUser.uid;
+              }
 
-            return;
+              return;
+            });
+
+        if (
+          buzzResult.committed &&
+          buzzResult.snapshot.val() === currentUser.uid
+        ) {
+          await roomReference.update({
+            buzzStartedAt:
+              firebase.database.ServerValue.TIMESTAMP
           });
+        }
       } catch (error) {
         showError(
           "Could not buzz in: " +
@@ -2075,6 +2556,7 @@
 
       await roomReference.update({
         buzzedBy: null,
+        buzzStartedAt: null,
         questionOpen: false
       });
     }
@@ -2109,6 +2591,7 @@
 
       await roomReference.update({
         buzzedBy: null,
+        buzzStartedAt: null,
         questionOpen: false
       });
     }
@@ -2139,6 +2622,7 @@
         await roomReference.update({
           status: "finished",
           buzzedBy: null,
+          buzzStartedAt: null,
           questionOpen: false,
           questionVisibleToStudents: false
         });
@@ -2149,6 +2633,7 @@
       await roomReference.update({
         currentQuestionIndex: nextIndex,
         buzzedBy: null,
+        buzzStartedAt: null,
         questionOpen: true,
         questionVisibleToStudents: false,
         questionStartedAt:
@@ -2309,6 +2794,7 @@
       microphoneOn = false;
       cameraOn = false;
       updateMediaStatus();
+      stopTimerDisplay();
 
       if (!currentRoomCode || !currentUser) {
         showOnly($("homeScreen"));
@@ -2350,6 +2836,7 @@
       microphoneOn = false;
       cameraOn = false;
       lastSpokenQuestionKey = "";
+      roundSetupMode = false;
 
       $("coachRoomArea").classList.add("hidden");
       $("studentRoomArea").classList.add("hidden");
@@ -2357,7 +2844,14 @@
       $("coachLivekitMediaContainer").innerHTML = "";
       $("studentLivekitMediaContainer").innerHTML = "";
 
+      $("coachSetupTitle").textContent =
+        "Coach Setup";
+
+      $("createRoomButton").textContent =
+        "Create New Room";
+
       updateMediaStatus();
+      stopTimerDisplay();
     }
 
     $("coachButton").addEventListener(
@@ -2416,6 +2910,11 @@
       nextQuestion
     );
 
+    $("coachNewRoundButton").addEventListener(
+      "click",
+      openNewRoundSetup
+    );
+
     $("coachMicButton").addEventListener(
       "click",
       toggleMicrophone
@@ -2468,7 +2967,14 @@
 
     $("coachBackButton").addEventListener(
       "click",
-      () => showOnly($("homeScreen"))
+      () => {
+        roundSetupMode = false;
+        $("coachSetupTitle").textContent =
+          "Coach Setup";
+        $("createRoomButton").textContent =
+          "Create New Room";
+        showOnly($("homeScreen"));
+      }
     );
 
     $("studentBackButton").addEventListener(
@@ -2525,6 +3031,18 @@
       updateCoachPreview
     );
 
+    $("answerTimeLimitSelect").addEventListener(
+      "change",
+      updateCoachPreview
+    );
+
+    database
+      .ref(".info/serverTimeOffset")
+      .on("value", snapshot => {
+        serverTimeOffset =
+          Number(snapshot.val() || 0);
+      });
+
     auth.onAuthStateChanged(user => {
       currentUser = user;
     });
@@ -2551,8 +3069,7 @@
 
     updateCoachPreview();
     updateMediaStatus();
+    startTimerDisplay();
   </script>
-  <script src="new-round-setup.js"></script>
-  <script src="coach-answer.js"></script>
 </body>
 </html>
