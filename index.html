@@ -2446,69 +2446,108 @@
     }
 
     async function buzzIn() {
-      if (!currentRoomCode || !currentUser) {
-        return;
-      }
+  if (!currentRoomCode || !currentUser) {
+    return;
+  }
 
-      try {
-        const roomReference =
-          database.ref("rooms/" + currentRoomCode);
+  try {
+    const roomReference =
+      database.ref("rooms/" + currentRoomCode);
 
-        const snapshot =
-          await roomReference.once("value");
+    const snapshot =
+      await roomReference.once("value");
 
-        const room = snapshot.val();
+    const room = snapshot.val();
 
-        const player =
-          room &&
-          room.players &&
-          room.players[currentUser.uid];
+    const player =
+      room &&
+      room.players &&
+      room.players[currentUser.uid];
 
-        if (!room || !player) {
-          return;
-        }
-
-        const reachedLimit =
-          Number(player.correct || 0) >=
-          Number(room.settings.maxCorrect) &&
-          player.limitOverride !== true;
-
-        if (
-          room.status !== "started" ||
-          room.questionOpen !== true ||
-          room.buzzedBy ||
-          reachedLimit
-        ) {
-          return;
-        }
-
-        const buzzResult =
-          await roomReference
-            .child("buzzedBy")
-            .transaction(value => {
-              if (value === null) {
-                return currentUser.uid;
-              }
-
-              return;
-            });
-
-        if (
-          buzzResult.committed &&
-          buzzResult.snapshot.val() === currentUser.uid
-        ) {
-          await roomReference.update({
-            buzzStartedAt:
-              firebase.database.ServerValue.TIMESTAMP
-          });
-        }
-      } catch (error) {
-        showError(
-          "Could not buzz in: " +
-          error.message
-        );
-      }
+    if (!room || !player) {
+      return;
     }
+
+    const reachedLimit =
+      Number(player.correct || 0) >=
+      Number(room.settings.maxCorrect) &&
+      player.limitOverride !== true;
+
+    if (
+      room.status !== "started" ||
+      room.questionOpen !== true ||
+      room.buzzedBy ||
+      reachedLimit
+    ) {
+      return;
+    }
+
+    const buzzResult =
+      await roomReference
+        .child("buzzedBy")
+        .transaction(value => {
+          if (value === null) {
+            return currentUser.uid;
+          }
+
+          return;
+        });
+
+    /*
+      Only the actual first buzzer turns on
+      microphone and camera.
+    */
+    if (
+      buzzResult.committed &&
+      buzzResult.snapshot.val() === currentUser.uid
+    ) {
+      await roomReference.update({
+        buzzStartedAt:
+          firebase.database.ServerValue.TIMESTAMP
+      });
+
+      const playerName =
+        player.name ||
+        "Student";
+
+      /*
+        Automatically publish microphone.
+      */
+      await LiveKitMedia.turnMicrophoneOn(
+        "bq-" + currentRoomCode,
+        "firebase-" + currentUser.uid,
+        playerName
+      );
+
+      /*
+        Automatically publish camera.
+      */
+      await LiveKitMedia.turnCameraOn(
+        "bq-" + currentRoomCode,
+        "firebase-" + currentUser.uid,
+        playerName
+      );
+
+      microphoneOn = true;
+      cameraOn = true;
+
+      updateMediaStatus();
+
+      $("studentCompetitionStatus").textContent =
+        "You buzzed in. Microphone and camera are on.";
+
+    } else {
+      $("studentCompetitionStatus").textContent =
+        "Another student buzzed in first.";
+    }
+
+  } catch (error) {
+    showError(
+      "Could not buzz in or start media: " +
+      error.message
+    );
+  }
+}
 
     async function markCorrect() {
       if (!currentRoomCode) {
