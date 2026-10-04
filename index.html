@@ -680,6 +680,10 @@
         Next Question
       </button>
 
+      <button id="coachReplaceQuestionButton" class="red" disabled>
+  Replace Current Question
+</button>
+
       <button id="coachNewRoundButton" class="green hidden">
         New Round Setup
       </button>
@@ -1789,7 +1793,14 @@ if (
       $("coachNextButton").disabled =
         currentRole !== "coach" ||
         room.status !== "started";
+    $("coachReplaceQuestionButton").disabled =
+  currentRole !== "coach" ||
+  room.status !== "started" ||
+  room.currentQuestionIndex < 0;
 
+
+
+      
       $("coachShowQuestionButton").disabled =
         currentRole !== "coach" ||
         room.status !== "started" ||
@@ -2644,6 +2655,107 @@ if (
       });
     }
 
+    async function replaceCurrentQuestion() {
+  if (!currentRoomCode) {
+    return;
+  }
+
+  const confirmed = window.confirm(
+    "Replace the current question? The current question will be removed from this round and replaced with a new random question."
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    /*
+      Stop Coach browser question reading immediately.
+    */
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+
+    const roomReference =
+      database.ref("rooms/" + currentRoomCode);
+
+    const snapshot =
+      await roomReference.once("value");
+
+    const room =
+      snapshot.val();
+
+    if (
+      !room ||
+      !Array.isArray(room.questionIds) ||
+      room.currentQuestionIndex < 0
+    ) {
+      showError(
+        "There is no current question to replace."
+      );
+      return;
+    }
+
+    /*
+      Find questions that match the Coach's original
+      range and question-type settings.
+    */
+    const availableQuestions =
+      getQuestionsForSettings(room.settings);
+
+    /*
+      Do NOT allow a replacement question that is
+      already included anywhere in this round.
+    */
+    const usedQuestionIds =
+      new Set(room.questionIds);
+
+    const replacementCandidates =
+      availableQuestions.filter(question => {
+        return !usedQuestionIds.has(question.id);
+      });
+
+    if (replacementCandidates.length === 0) {
+      showError(
+        "No unused replacement questions are available for the current range and question types."
+      );
+      return;
+    }
+
+    const replacementQuestion =
+      shuffle(replacementCandidates)[0];
+
+    const updateData = {
+      buzzedBy: null,
+      buzzStartedAt: null,
+      questionOpen: true,
+      questionVisibleToStudents: false,
+      questionStartedAt:
+        firebase.database.ServerValue.TIMESTAMP
+    };
+
+    /*
+      Replace only the current question position.
+      For example, Question 5 stays Question 5.
+    */
+    updateData[
+      "questionIds/" + room.currentQuestionIndex
+    ] = replacementQuestion.id;
+
+    await roomReference.update(updateData);
+
+    if (currentRole === "coach") {
+      $("coachCompetitionStatus").textContent =
+        "Current question replaced. Student text is hidden and Buzz In is open.";
+    }
+
+  } catch (error) {
+    showError(
+      "Could not replace current question: " +
+      error.message
+    );
+  }
+}
     async function nextQuestion() {
       if (!currentRoomCode) {
         return;
@@ -2957,7 +3069,13 @@ if (
       "click",
       nextQuestion
     );
+    $("coachReplaceQuestionButton").addEventListener(
+  "click",
+  replaceCurrentQuestion
+);
 
+
+    
     $("coachNewRoundButton").addEventListener(
       "click",
       openNewRoundSetup
