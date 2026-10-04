@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>BQ John In-Person Practice</title>
+
+  <style>
+    :root {
+      --blue: #2457a6;
+      --blue-dark: #173d78;
+      --light-blue: #eef4ff;
+      --green: #16834b;
+      --light-green: #effcf5;
+      --red: #b42318;
+      --light-red: #fff1f0;
+      --orange: #b54708;
+      --light-orange: #fff4e5;
+      --gray: #667085;
+      --dark: #17202a;
+      --border: #d0d5dd;
+      --background: #f7f9fc;
+      --white: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--dark);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      color: var(--blue);
+      font-size: 32px;
+    }
+
+    h2,
+    h3 {
+      color: var(--blue-dark);
+    }
+
+    .subtitle {
+      color: var(--gray);
+      font-size: 14px;
+    }
+
+    .card {
+      margin-bottom: 18px;
+      padding: 22px;
+      border-radius: 16px;
+      background: var(--white);
+      box-shadow: 0 4px 16px rgba(16, 24, 40, 0.08);
+    }
+
+    label {
+      display: block;
+      margin-top: 16px;
+      margin-bottom: 7px;
+      font-weight: bold;
+    }
+
+    input,
+    select,
+    button {
+      width: 100%;
+      min-height: 44px;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    input,
+    select {
+      padding: 9px 10px;
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--dark);
+    }
+
+    button {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      filter: brightness(0.96);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .primary {
+      background: var(--blue);
+      color: white;
+    }
+
+    .secondary {
+      background: var(--light-blue);
+      color: var(--blue);
+    }
+
+    .green {
+      background: var(--green);
+      color: white;
+    }
+
+    .red {
+      border: 1px solid #f2b8b5;
+      background: var(--light-red);
+      color: var(--red);
+    }
+
+    .gray-button {
+      background: #f2f4f7;
+      color: #344054;
+    }
+
+    .orange {
+      background: var(--light-orange);
+      color: var(--orange);
+      border: 1px solid #f4c58d;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .reference-grid,
+    .student-entry-grid,
+    .limit-grid,
+    .button-row {
+      display: grid;
+      gap: 10px;
+    }
+
+    .reference-grid {
+      grid-template-columns: 1fr 1.4fr;
+    }
+
+    .student-entry-grid {
+      grid-template-columns: 1fr auto;
+    }
+
+    .student-entry-grid button {
+      width: auto;
+      margin-top: 0;
+      min-width: 110px;
+    }
+
+    .limit-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .button-row {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .type-option {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0;
+      padding: 9px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: normal;
+    }
+
+    .type-option input {
+      width: 16px;
+      min-height: 16px;
+      margin: 0;
+    }
+
+    .type-code {
+      color: var(--blue);
+      font-weight: bold;
+    }
+
+    .student-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .student-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 18px;
+      background: var(--light-blue);
+      color: var(--blue-dark);
+      font-weight: bold;
+    }
+
+    .remove-chip {
+      width: auto;
+      min-height: 24px;
+      margin: 0;
+      padding: 0 5px;
+      border: none;
+      background: transparent;
+      color: var(--red);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .status,
+    .error {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 9px;
+      line-height: 1.5;
+    }
+
+    .status {
+      background: #f9fafb;
+      color: var(--gray);
+    }
+
+    .error {
+      background: var(--light-red);
+      color: var(--red);
+    }
+
+    .question-box {
+      margin: 16px 0;
+      padding: 18px;
+      border: 2px solid var(--blue);
+      border-radius: 12px;
+      background: var(--light-blue);
+    }
+
+    .question-label {
+      margin-bottom: 8px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .question-text {
+      font-size: 24px;
+      font-weight: bold;
+      line-height: 1.45;
+    }
+
+    .question-reference {
+      margin-top: 10px;
+      color: var(--gray);
+      font-size: 14px;
+    }
+
+    .answer-box {
+      margin-top: 18px;
+      padding: 14px;
+      border-left: 5px solid var(--green);
+      border-radius: 8px;
+      background: var(--light-green);
+    }
+
+    .answer-label {
+      margin-bottom: 8px;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .answer-text {
+      font-size: 18px;
+      font-weight: bold;
+      line-height: 1.45;
+    }
+
+    .scoreboard {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--blue-dark);
+      font-size: 14px;
+    }
+
+    .small-button {
+      width: auto;
+      min-height: 34px;
+      margin: 0;
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+
+    .round-finished {
+      padding: 18px;
+      border-radius: 12px;
+      background: var(--light-green);
+      color: var(--green);
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    @media (max-width: 680px) {
+      .type-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 580px) {
+      .app {
+        padding: 12px;
+      }
+
+      .card {
+        padding: 17px;
+      }
+
+      h1 {
+        font-size: 27px;
+      }
+
+      .reference-grid,
+      .student-entry-grid,
+      .limit-grid,
+      .button-row,
+      .type-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .student-entry-grid button {
+        width: 100%;
+      }
+
+      .question-text {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+
+    <header>
+      <h1>BQ John In-Person Practice</h1>
+      <div class="subtitle">
+        Coach-operated Bible Quizzing
+      </div>
+    </header>
+
+    <!-- SETUP -->
+    <section id="setupScreen" class="card">
+      <h2 id="setupTitle">Round Setup</h2>
+
+      <label for="studentNameInput">
+        Add Students
+      </label>
+
+      <div class="student-entry-grid">
+        <input
+          id="studentNameInput"
+          type="text"
+          maxlength="30"
+          placeholder="Enter student name"
+        >
+
+        <button id="addStudentButton" class="secondary">
+          Add Student
+        </button>
+      </div>
+
+      <div id="studentChips" class="student-chips"></div>
+
+      <label>Start Reference</label>
+
+      <div class="reference-grid">
+        <select id="startChapter"></select>
+        <select id="startVerse"></select>
+      </div>
+
+      <label>End Reference</label>
+
+      <div class="reference-grid">
+        <select id="endChapter"></select>
+        <select id="endVerse"></select>
+      </div>
+
+      <label>Question Types</label>
+      <div id="typeGrid" class="type-grid"></div>
+
+      <label for="questionCount">
+        Number of Questions
+      </label>
+
+      <select id="questionCount">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="15">15</option>
+        <option value="20" selected>20</option>
+        <option value="25">25</option>
+        <option value="30">30</option>
+        <option value="50">50</option>
+        <option value="all">All Available</option>
+      </select>
+
+      <div class="limit-grid">
+        <div>
+          <label for="correctLimit">
+            Maximum Correct Answers
+          </label>
+
+          <select id="correctLimit">
+            <option value="4" selected>4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="wrongLimit">
+            Maximum Wrong Answers
+          </label>
+
+          <select id="wrongLimit">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4" selected>4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="setupPreview" class="status"></div>
+
+      <div id="setupError" class="error hidden"></div>
+
+      <button id="startRoundButton" class="primary">
+        Start Round
+      </button>
+    </section>
+
+    <!-- ROUND -->
+    <section id="roundScreen" class="card hidden">
+      <h2>In-Person Round</h2>
+
+      <div id="roundStatus" class="status"></div>
+
+      <div id="questionBox" class="question-box">
+        <div id="questionLabel" class="question-label"></div>
+        <div id="questionText" class="question-text"></div>
+        <div id="questionReference" class="question-reference"></div>
+
+        <div class="answer-box">
+          <div class="answer-label">
+            Correct Answer
+          </div>
+
+          <div id="answerText" class="answer-text"></div>
+        </div>
+      </div>
+
+      <label for="answeringStudent">
+        Student Answering
+      </label>
+
+      <select id="answeringStudent"></select>
+
+      <div class="button-row">
+        <button id="correctButton" class="green">
+          Correct
+        </button>
+
+        <button id="wrongButton" class="red">
+          Wrong
+        </button>
+      </div>
+
+      <button id="replaceQuestionButton" class="orange">
+        Replace Current Question
+      </button>
+
+      <button id="nextQuestionButton" class="primary">
+        Next Question
+      </button>
+
+      <button id="endRoundButton" class="gray-button">
+        End Round
+      </button>
+
+      <h3>Scoreboard</h3>
+
+      <div class="scoreboard">
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Correct</th>
+              <th>Wrong</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody id="scoreboardBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ROUND FINISHED -->
+    <section id="finishedScreen" class="card hidden">
+      <div class="round-finished">
+        Round Complete
+      </div>
+
+      <h3>Final Scoreboard</h3>
+
+      <div class="scoreboard">
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Correct</th>
+              <th>Wrong</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody id="finishedScoreboardBody"></tbody>
+        </table>
+      </div>
+
+      <button id="newRoundButton" class="green">
+        New Round Setup
+      </button>
+
+      <button id="resetAllButton" class="red">
+        End Session and Clear Students
+      </button>
+    </section>
+
+  </main>
+
+  <!-- Question Bank -->
+  <script src="questions-01.js"></script>
+  <script src="questions-02.js"></script>
+  <script src="questions-03.js"></script>
+  <script src="questions-04.js"></script>
+  <script src="questions-05.js"></script>
+  <script src="questions-06.js"></script>
+  <script src="questions-07.js"></script>
+  <script src="questions-08.js"></script>
+  <script src="questions-09.js"></script>
+  <script src="questions-10.js"></script>
+  <script src="questions-11.js"></script>
+  <script src="questions-12.js"></script>
+  <script src="questions-13.js"></script>
+  <script src="questions-14.js"></script>
+  <script src="questions-15.js"></script>
+  <script src="questions-16.js"></script>
+  <script src="questions-17.js"></script>
+  <script src="questions-18.js"></script>
+  <script src="questions-19.js"></script>
+  <script src="questions-20.js"></script>
+  <script src="questions-21.js"></script>
+
+  <script>
+    const QUESTION_BANK =
+      Array.isArray(window.QUESTION_BANK)
+        ? window.QUESTION_BANK
+        : [];
+
+    const CHAPTER_VERSES = {
+      1: 51,
+      2: 25,
+      3: 36,
+      4: 54,
+      5: 47,
+      6: 71,
+      7: 53,
+      8: 59,
+      9: 41,
+      10: 42,
+      11: 57,
+      12: 50,
+      13: 38,
+      14: 31,
+      15: 27,
+      16: 33,
+      17: 26,
+      18: 40,
+      19: 42,
+      20: 31,
+      21: 25
+    };
+
+    const TYPE_NAMES = {
+      INT: "Interrogative Question",
+      MA: "Multiple Answer",
+      Q: "Quote the Verse",
+      FTV: "Finish the Verse",
+      FT: "Finish the Statement",
+      FTN: "Finish the Next Portion",
+      CR: "Chapter-only Reference",
+      CVR: "Chapter-and-Verse Reference",
+      SIT: "Situation Question",
+      F2V: "Finish Two Verses",
+      Q2V: "Quote Two Verses",
+      CRMA: "Chapter Reference, Multiple Answer",
+      CVRMA: "Chapter-and-Verse Reference, Multiple Answer"
+    };
+
+    const QUESTION_TYPE_ORDER = [
+      "INT",
+      "MA",
+      "Q",
+      "FTV",
+      "CR",
+      "CVR",
+      "SIT",
+      "F2V",
+      "Q2V",
+      "FT",
+      "FTN",
+      "CRMA",
+      "CVRMA"
+    ];
+
+    let students = [];
+    let settings = null;
+    let roundQuestions = [];
+    let currentIndex = 0;
+    let roundActive = false;
+    let roundFinished = false;
+
+    const $ = id =>
+      document.getElementById(id);
+
+    function showOnly(screen) {
+      $("setupScreen").classList.add("hidden");
+      $("roundScreen").classList.add("hidden");
+      $("finishedScreen").classList.add("hidden");
+
+      screen.classList.remove("hidden");
+    }
+
+    function showSetupError(message) {
+      $("setupError").textContent = message;
+      $("setupError").classList.remove("hidden");
+    }
+
+    function clearSetupError() {
+      $("setupError").textContent = "";
+      $("setupError").classList.add("hidden");
+    }
+
+    function makeStudentId() {
+      return (
+        "student-" +
+        Date.now() +
+        "-" +
+        Math.random()
+          .toString(36)
+          .slice(2, 8)
+      );
+    }
+
+    function getPosition(chapter, verse) {
+      return Number(chapter) * 1000 +
+        Number(verse);
+    }
+
+    function shuffle(array) {
+      const copied = [...array];
+
+      for (
+        let index = copied.length - 1;
+        index > 0;
+        index--
+      ) {
+        const randomIndex =
+          Math.floor(
+            Math.random() * (index + 1)
+          );
+
+        [
+          copied[index],
+          copied[randomIndex]
+        ] = [
+          copied[randomIndex],
+          copied[index]
+        ];
+      }
+
+      return copied;
+    }
+
+    function populateChapters(selectElement) {
+      selectElement.innerHTML = "";
+
+      for (
+        let chapter = 1;
+        chapter <= 21;
+        chapter++
+      ) {
+        const option =
+          document.createElement("option");
+
+        option.value = chapter;
+        option.textContent = "John " + chapter;
+
+        selectElement.appendChild(option);
+      }
+    }
+
+    function populateVerses(
+      selectElement,
+      chapter,
+      selectedVerse
+    ) {
+      selectElement.innerHTML = "";
+
+      const count =
+        CHAPTER_VERSES[chapter];
+
+      for (
+        let verse = 1;
+        verse <= count;
+        verse++
+      ) {
+        const option =
+          document.createElement("option");
+
+        option.value = verse;
+        option.textContent = "Verse " + verse;
+
+        selectElement.appendChild(option);
+      }
+
+      selectElement.value =
+        Math.min(
+          selectedVerse || 1,
+          count
+        );
+    }
+
+    function renderTypeOptions() {
+      const grid = $("typeGrid");
+      grid.innerHTML = "";
+
+      const existingTypes = new Set(
+        QUESTION_BANK
+          .map(question => question.type)
+          .filter(Boolean)
+      );
+
+      QUESTION_TYPE_ORDER
+        .filter(type => existingTypes.has(type))
+        .forEach(type => {
+          const label =
+            document.createElement("label");
+
+          label.className =
+            "type-option";
+
+          const checkbox =
+            document.createElement("input");
+
+          checkbox.type = "checkbox";
+          checkbox.name = "questionType";
+          checkbox.value = type;
+          checkbox.checked = true;
+
+          checkbox.addEventListener(
+            "change",
+            updateSetupPreview
+          );
+
+          const code =
+            document.createElement("span");
+
+          code.className = "type-code";
+          code.textContent = type;
+
+          const name =
+            document.createElement("span");
+
+          name.textContent =
+            TYPE_NAMES[type] || type;
+
+          label.appendChild(checkbox);
+          label.appendChild(code);
+          label.appendChild(name);
+
+          grid.appendChild(label);
+        });
+    }
+
+    function getSelectedTypes() {
+      return [
+        ...document.querySelectorAll(
+          'input[name="questionType"]:checked'
+        )
+      ].map(input => input.value);
+    }
+
+    function getSettingsFromForm() {
+      return {
+        startChapter:
+          Number($("startChapter").value),
+
+        startVerse:
+          Number($("startVerse").value),
+
+        endChapter:
+          Number($("endChapter").value),
+
+        endVerse:
+          Number($("endVerse").value),
+
+        questionTypes:
+          getSelectedTypes(),
+
+        questionCount:
+          $("questionCount").value === "all"
+            ? "all"
+            : Number($("questionCount").value),
+
+        correctLimit:
+          Number($("correctLimit").value),
+
+        wrongLimit:
+          Number($("wrongLimit").value)
+      };
+    }
+
+    function getMatchingQuestions(currentSettings) {
+      const start =
+        getPosition(
+          currentSettings.startChapter,
+          currentSettings.startVerse
+        );
+
+      const end =
+        getPosition(
+          currentSettings.endChapter,
+          currentSettings.endVerse
+        );
+
+      return QUESTION_BANK.filter(question => {
+        const position =
+          getPosition(
+            question.chapter,
+            question.verse
+          );
+
+        return (
+          position >= start &&
+          position <= end &&
+          currentSettings.questionTypes.includes(
+            question.type
+          )
+        );
+      });
+    }
+
+    function updateSetupPreview() {
+      const currentSettings =
+        getSettingsFromForm();
+
+      if (
+        getPosition(
+          currentSettings.startChapter,
+          currentSettings.startVerse
+        ) >
+        getPosition(
+          currentSettings.endChapter,
+          currentSettings.endVerse
+        )
+      ) {
+        $("setupPreview").textContent =
+          "Invalid reference range.";
+        return;
+      }
+
+      if (
+        currentSettings.questionTypes.length === 0
+      ) {
+        $("setupPreview").textContent =
+          "Please select at least one question type.";
+        return;
+      }
+
+      const available =
+        getMatchingQuestions(currentSettings)
+          .length;
+
+      $("setupPreview").textContent =
+        "Range: John " +
+        currentSettings.startChapter +
+        ":" +
+        currentSettings.startVerse +
+        " - John " +
+        currentSettings.endChapter +
+        ":" +
+        currentSettings.endVerse +
+        ". Available questions: " +
+        available +
+        ". Correct limit: " +
+        currentSettings.correctLimit +
+        ". Wrong limit: " +
+        currentSettings.wrongLimit +
+        ".";
+    }
+
+    function renderStudentChips() {
+      const container = $("studentChips");
+      container.innerHTML = "";
+
+      students.forEach(student => {
+        const chip =
+          document.createElement("div");
+
+        chip.className = "student-chip";
+
+        const name =
+          document.createElement("span");
+
+        name.textContent = student.name;
+
+        const remove =
+          document.createElement("button");
+
+        remove.className = "remove-chip";
+        remove.textContent = "x";
+        remove.title = "Remove student";
+
+        remove.addEventListener(
+          "click",
+          () => {
+            if (roundActive) {
+              return;
+            }
+
+            students = students.filter(
+              item => item.id !== student.id
+            );
+
+            renderStudentChips();
+          }
+        );
+
+        chip.appendChild(name);
+        chip.appendChild(remove);
+
+        container.appendChild(chip);
+      });
+    }
+
+    function addStudent() {
+      const input = $("studentNameInput");
+      const name = input.value.trim();
+
+      if (!name) {
+        return;
+      }
+
+      const duplicate =
+        students.some(student =>
+          student.name.toLowerCase() ===
+          name.toLowerCase()
+        );
+
+      if (duplicate) {
+        showSetupError(
+          "A student with that name already exists."
+        );
+        return;
+      }
+
+      clearSetupError();
+
+      students.push({
+        id: makeStudentId(),
+        name: name,
+        correct: 0,
+        wrong: 0,
+        manualOverride: false,
+        manualLocked: false
+      });
+
+      input.value = "";
+      renderStudentChips();
+    }
+
+    function applySettingsToForm(currentSettings) {
+      if (!currentSettings) {
+        return;
+      }
+
+      $("startChapter").value =
+        String(currentSettings.startChapter);
+
+      $("endChapter").value =
+        String(currentSettings.endChapter);
+
+      populateVerses(
+        $("startVerse"),
+        currentSettings.startChapter,
+        currentSettings.startVerse
+      );
+
+      populateVerses(
+        $("endVerse"),
+        currentSettings.endChapter,
+        currentSettings.endVerse
+      );
+
+      $("questionCount").value =
+        String(currentSettings.questionCount);
+
+      $("correctLimit").value =
+        String(currentSettings.correctLimit);
+
+      $("wrongLimit").value =
+        String(currentSettings.wrongLimit);
+
+      document
+        .querySelectorAll(
+          'input[name="questionType"]'
+        )
+        .forEach(input => {
+          input.checked =
+            currentSettings.questionTypes.includes(
+              input.value
+            );
+        });
+
+      updateSetupPreview();
+    }
+
+    function isCorrectLimitReached(student) {
+      return (
+        student.correct >= settings.correctLimit
+      );
+    }
+
+    function isWrongLimitReached(student) {
+      return (
+        student.wrong >= settings.wrongLimit
+      );
+    }
+
+    function canAnswer(student) {
+      if (student.manualLocked) {
+        return false;
+      }
+
+      if (student.manualOverride) {
+        return true;
+      }
+
+      if (isCorrectLimitReached(student)) {
+        return false;
+      }
+
+      if (isWrongLimitReached(student)) {
+        return false;
+      }
+
+      return true;
+    }
+
+    function getStudentStatus(student) {
+      if (student.manualLocked) {
+        return "Locked";
+      }
+
+      if (student.manualOverride) {
+        return "Manual Override";
+      }
+
+      if (isCorrectLimitReached(student)) {
+        return "Correct Limit Reached";
+      }
+
+      if (isWrongLimitReached(student)) {
+        return "Error Out";
+      }
+
+      return "Ready";
+    }
+
+    function renderAnsweringStudentSelect() {
+      const select = $("answeringStudent");
+      select.innerHTML = "";
+
+      const placeholder =
+        document.createElement("option");
+
+      placeholder.value = "";
+      placeholder.textContent =
+        "Select student answering";
+
+      select.appendChild(placeholder);
+
+      students.forEach(student => {
+        const option =
+          document.createElement("option");
+
+        option.value = student.id;
+
+        option.textContent =
+          student.name +
+          " - " +
+          getStudentStatus(student);
+
+        option.disabled =
+          !canAnswer(student);
+
+        select.appendChild(option);
+      });
+    }
+
+    function renderScoreboard(body, includeActions) {
+      body.innerHTML = "";
+
+      const rankedStudents =
+        [...students].sort((a, b) => {
+          if (b.correct !== a.correct) {
+            return b.correct - a.correct;
+          }
+
+          return a.wrong - b.wrong;
+        });
+
+      rankedStudents.forEach(student => {
+        const row =
+          document.createElement("tr");
+
+        const nameCell =
+          document.createElement("td");
+
+        const correctCell =
+          document.createElement("td");
+
+        const wrongCell =
+          document.createElement("td");
+
+        const statusCell =
+          document.createElement("td");
+
+        nameCell.textContent =
+          student.name;
+
+        correctCell.textContent =
+          student.correct +
+          " / " +
+          settings.correctLimit;
+
+        wrongCell.textContent =
+          student.wrong +
+          " / " +
+          settings.wrongLimit;
+
+        statusCell.textContent =
+          getStudentStatus(student);
+
+        row.appendChild(nameCell);
+        row.appendChild(correctCell);
+        row.appendChild(wrongCell);
+        row.appendChild(statusCell);
+
+        if (includeActions) {
+          const actionCell =
+            document.createElement("td");
+
+          const button =
+            document.createElement("button");
+
+          button.className =
+            "small-button " +
+            (
+              student.manualLocked
+                ? "secondary"
+                : (
+                  student.manualOverride ||
+                  isCorrectLimitReached(student) ||
+                  isWrongLimitReached(student)
+                    ? "green"
+                    : "red"
+                )
+            );
+
+          if (student.manualLocked) {
+            button.textContent = "Unlock";
+          } else if (
+            student.manualOverride ||
+            isCorrectLimitReached(student) ||
+            isWrongLimitReached(student)
+          ) {
+            button.textContent = "Unlock";
+          } else {
+            button.textContent = "Lock";
+          }
+
+          button.addEventListener(
+            "click",
+            () => {
+              toggleStudentLock(student.id);
+            }
+          );
+
+          actionCell.appendChild(button);
+          row.appendChild(actionCell);
+        }
+
+        body.appendChild(row);
+      });
+    }
+
+    function renderCurrentQuestion() {
+      if (!roundQuestions.length) {
+        return;
+      }
+
+      const question =
+        roundQuestions[currentIndex];
+
+      const typeName =
+        TYPE_NAMES[question.type] ||
+        question.type;
+
+      $("questionLabel").textContent =
+        "Question " +
+        (currentIndex + 1) +
+        " of " +
+        roundQuestions.length +
+        " | " +
+        question.type +
+        " - " +
+        typeName;
+
+      $("questionText").textContent =
+        question.question;
+
+      $("questionReference").textContent =
+        "Reference: " +
+        question.reference;
+
+      $("answerText").textContent =
+        question.answer;
+
+      $("roundStatus").textContent =
+        "Select the student who answered, then mark Correct or Wrong.";
+
+      renderAnsweringStudentSelect();
+      renderScoreboard(
+        $("scoreboardBody"),
+        true
+      );
+    }
+
+    function startRound() {
+      clearSetupError();
+
+      if (students.length === 0) {
+        showSetupError(
+          "Add at least one student."
+        );
+        return;
+      }
+
+      settings = getSettingsFromForm();
+
+      if (
+        getPosition(
+          settings.startChapter,
+          settings.startVerse
+        ) >
+        getPosition(
+          settings.endChapter,
+          settings.endVerse
+        )
+      ) {
+        showSetupError(
+          "Invalid reference range."
+        );
+        return;
+      }
+
+      if (
+        settings.questionTypes.length === 0
+      ) {
+        showSetupError(
+          "Select at least one question type."
+        );
+        return;
+      }
+
+      const availableQuestions =
+        getMatchingQuestions(settings);
+
+      if (availableQuestions.length === 0) {
+        showSetupError(
+          "No questions match these settings."
+        );
+        return;
+      }
+
+      const requestedCount =
+        settings.questionCount === "all"
+          ? availableQuestions.length
+          : settings.questionCount;
+
+      const actualCount =
+        Math.min(
+          requestedCount,
+          availableQuestions.length
+        );
+
+      roundQuestions =
+        shuffle(availableQuestions)
+          .slice(0, actualCount);
+
+      students = students.map(student => ({
+        ...student,
+        correct: 0,
+        wrong: 0,
+        manualOverride: false,
+        manualLocked: false
+      }));
+
+      currentIndex = 0;
+      roundActive = true;
+      roundFinished = false;
+
+      $("setupTitle").textContent =
+        "Round Setup";
+
+      $("startRoundButton").textContent =
+        "Start Round";
+
+      showOnly($("roundScreen"));
+      renderCurrentQuestion();
+    }
+
+    function getSelectedStudent() {
+      const selectedId =
+        $("answeringStudent").value;
+
+      return students.find(
+        student => student.id === selectedId
+      );
+    }
+
+    function markCorrect() {
+      const student =
+        getSelectedStudent();
+
+      if (!student) {
+        $("roundStatus").textContent =
+          "Please select a student first.";
+        return;
+      }
+
+      if (!canAnswer(student)) {
+        $("roundStatus").textContent =
+          student.name +
+          " cannot answer right now. Use Unlock if needed.";
+        return;
+      }
+
+      student.correct += 1;
+
+      $("roundStatus").textContent =
+        student.name +
+        " marked Correct.";
+
+      renderAnsweringStudentSelect();
+      renderScoreboard(
+        $("scoreboardBody"),
+        true
+      );
+    }
+
+    function markWrong() {
+      const student =
+        getSelectedStudent();
+
+      if (!student) {
+        $("roundStatus").textContent =
+          "Please select a student first.";
+        return;
+      }
+
+      if (!canAnswer(student)) {
+        $("roundStatus").textContent =
+          student.name +
+          " cannot answer right now. Use Unlock if needed.";
+        return;
+      }
+
+      student.wrong += 1;
+
+      $("roundStatus").textContent =
+        student.name +
+        " marked Wrong.";
+
+      renderAnsweringStudentSelect();
+      renderScoreboard(
+        $("scoreboardBody"),
+        true
+      );
+    }
+
+    function toggleStudentLock(studentId) {
+      const student =
+        students.find(
+          item => item.id === studentId
+        );
+
+      if (!student) {
+        return;
+      }
+
+      if (student.manualLocked) {
+        student.manualLocked = false;
+        student.manualOverride = false;
+
+      } else if (
+        student.manualOverride ||
+        isCorrectLimitReached(student) ||
+        isWrongLimitReached(student)
+      ) {
+        student.manualLocked = false;
+        student.manualOverride = true;
+
+      } else {
+        student.manualLocked = true;
+        student.manualOverride = false;
+      }
+
+      renderAnsweringStudentSelect();
+      renderScoreboard(
+        $("scoreboardBody"),
+        true
+      );
+    }
+
+    function replaceCurrentQuestion() {
+      const availableQuestions =
+        getMatchingQuestions(settings);
+
+      const usedIds =
+        new Set(
+          roundQuestions.map(
+            question => question.id
+          )
+        );
+
+      const candidates =
+        availableQuestions.filter(
+          question =>
+            !usedIds.has(question.id)
+        );
+
+      if (candidates.length === 0) {
+        $("roundStatus").textContent =
+          "No unused replacement question is available.";
+        return;
+      }
+
+      const replacement =
+        shuffle(candidates)[0];
+
+      roundQuestions[currentIndex] =
+        replacement;
+
+      $("roundStatus").textContent =
+        "Current question replaced.";
+
+      renderCurrentQuestion();
+    }
+
+    function nextQuestion() {
+      if (
+        currentIndex >=
+        roundQuestions.length - 1
+      ) {
+        finishRound();
+        return;
+      }
+
+      currentIndex += 1;
+      renderCurrentQuestion();
+    }
+
+    function finishRound() {
+      roundActive = false;
+      roundFinished = true;
+
+      renderScoreboard(
+        $("finishedScoreboardBody"),
+        false
+      );
+
+      showOnly($("finishedScreen"));
+    }
+
+    function openNewRoundSetup() {
+      roundActive = false;
+      roundFinished = false;
+
+      $("setupTitle").textContent =
+        "New Round Setup";
+
+      $("startRoundButton").textContent =
+        "Start New Round";
+
+      applySettingsToForm(settings);
+
+      showOnly($("setupScreen"));
+      renderStudentChips();
+    }
+
+    function resetAll() {
+      students = [];
+      settings = null;
+      roundQuestions = [];
+      currentIndex = 0;
+      roundActive = false;
+      roundFinished = false;
+
+      $("studentNameInput").value = "";
+
+      $("setupTitle").textContent =
+        "Round Setup";
+
+      $("startRoundButton").textContent =
+        "Start Round";
+
+      $("correctLimit").value = "4";
+      $("wrongLimit").value = "4";
+      $("questionCount").value = "20";
+
+      document
+        .querySelectorAll(
+          'input[name="questionType"]'
+        )
+        .forEach(input => {
+          input.checked = true;
+        });
+
+      renderStudentChips();
+      updateSetupPreview();
+
+      showOnly($("setupScreen"));
+    }
+
+    $("addStudentButton").addEventListener(
+      "click",
+      addStudent
+    );
+
+    $("studentNameInput").addEventListener(
+      "keydown",
+      event => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          addStudent();
+        }
+      }
+    );
+
+    $("startRoundButton").addEventListener(
+      "click",
+      startRound
+    );
+
+    $("correctButton").addEventListener(
+      "click",
+      markCorrect
+    );
+
+    $("wrongButton").addEventListener(
+      "click",
+      markWrong
+    );
+
+    $("replaceQuestionButton").addEventListener(
+      "click",
+      replaceCurrentQuestion
+    );
+
+    $("nextQuestionButton").addEventListener(
+      "click",
+      nextQuestion
+    );
+
+    $("endRoundButton").addEventListener(
+      "click",
+      finishRound
+    );
+
+    $("newRoundButton").addEventListener(
+      "click",
+      openNewRoundSetup
+    );
+
+    $("resetAllButton").addEventListener(
+      "click",
+      resetAll
+    );
+
+    $("startChapter").addEventListener(
+      "change",
+      () => {
+        populateVerses(
+          $("startVerse"),
+          Number($("startChapter").value),
+          1
+        );
+
+        updateSetupPreview();
+      }
+    );
+
+    $("endChapter").addEventListener(
+      "change",
+      () => {
+        const chapter =
+          Number($("endChapter").value);
+
+        populateVerses(
+          $("endVerse"),
+          chapter,
+          CHAPTER_VERSES[chapter]
+        );
+
+        updateSetupPreview();
+      }
+    );
+
+    [
+      "startVerse",
+      "endVerse",
+      "questionCount",
+      "correctLimit",
+      "wrongLimit"
+    ].forEach(id => {
+      $(id).addEventListener(
+        "change",
+        updateSetupPreview
+      );
+    });
+
+    renderTypeOptions();
+
+    populateChapters($("startChapter"));
+    populateChapters($("endChapter"));
+
+    $("startChapter").value = "1";
+    $("endChapter").value = "21";
+
+    populateVerses(
+      $("startVerse"),
+      1,
+      1
+    );
+
+    populateVerses(
+      $("endVerse"),
+      21,
+      25
+    );
+
+    renderStudentChips();
+    updateSetupPreview();
+  </script>
+</body>
+</html>
