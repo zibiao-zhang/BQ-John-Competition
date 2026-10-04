@@ -2660,14 +2660,6 @@ if (
     return;
   }
 
-  const confirmed = window.confirm(
-    "Replace the current question? The current question will be removed from this round and replaced with a new random question."
-  );
-
-  if (!confirmed) {
-    return;
-  }
-
   try {
     /*
       Stop Coach browser question reading immediately.
